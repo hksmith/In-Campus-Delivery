@@ -93,7 +93,9 @@ export async function startBot() {
       console.log(`🤖 Bot @${bot.botInfo.username} running with long polling`);
     }
   } catch (err) {
-    console.error('❌ Could not start Telegram bot (check TELEGRAM_BOT_TOKEN):', err.message);
+    console.error('❌ Could not start Telegram bot:', err.message);
+    if (/401|Unauthorized|Not Found/i.test(err.message)) console.error('   → TELEGRAM_BOT_TOKEN looks wrong (get it again from @BotFather).');
+    if (/setWebhook/i.test(err.message)) console.error('   → Check BOT_WEBHOOK_URL (your backend https address) and BOT_WEBHOOK_SECRET (only A-Z a-z 0-9 _ -).');
   }
   return bot;
 }
