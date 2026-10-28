@@ -11,8 +11,10 @@ import { assertCanTake, chargeOrderFee, requestTopUp, walletSummary } from '../s
 
 const MY_ACTIVE = ['accepted', 'preparing', 'ready', 'picked_up'];
 
-/** Female-only drop-offs (female dorms) are hidden from male drivers */
-const genderFilter = (driver) => (driver.gender === 'female' ? {} : { 'delivery.femaleOnly': { $ne: true } });
+/** Single-gender drop-offs: a driver only sees places open to everyone or to their own gender */
+const genderFilter = (driver) => ({
+  'delivery.driverGender': { $in: ['any', null, ...(['female', 'male'].includes(driver.gender) ? [driver.gender] : [])] },
+});
 
 /** PATCH /api/driver/status { isOnline } */
 export async function setOnline(req, res) {
@@ -128,10 +130,11 @@ export async function claim(req, res) {
     throw ApiError.badRequest(`You can carry at most ${env.MAX_ACTIVE_DELIVERIES_PER_DRIVER} orders at once`);
   }
 
-  const target = await Order.findById(req.params.id).select('platformEarning delivery.femaleOnly');
+  const target = await Order.findById(req.params.id).select('platformEarning delivery.driverGender');
   if (!target) throw ApiError.notFound('Order not found');
-  if (target.delivery?.femaleOnly && me.gender !== 'female') {
-    throw ApiError.forbidden('Only female drivers can deliver to this location');
+  const only = target.delivery?.driverGender;
+  if (['female', 'male'].includes(only) && me.gender !== only) {
+    throw ApiError.forbidden(only === 'female' ? 'Only female drivers can deliver to this location' : 'Only male drivers can deliver to this location');
   }
   await assertCanTake(me, target);
 

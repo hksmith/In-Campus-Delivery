@@ -14,9 +14,9 @@ import { connectDB } from '../config/db.js';
 import { Cafe, Location, MenuItem, Settings, User } from '../models/index.js';
 
 const SAMPLE_LOCATIONS = [
-  { name: 'Male Dorm – Block A', type: 'dorm', deliveryFee: 15, sortOrder: 1 },
-  { name: 'Male Dorm – Block B', type: 'dorm', deliveryFee: 15, sortOrder: 2 },
-  { name: 'Female Dorm – Block C', type: 'dorm', deliveryFee: 15, sortOrder: 3, femaleOnly: true, description: 'Female drivers only' },
+  { name: 'Male Dorm – Block A', type: 'dorm', deliveryFee: 15, sortOrder: 1, driverGender: 'male', description: 'Male drivers only' },
+  { name: 'Male Dorm – Block B', type: 'dorm', deliveryFee: 15, sortOrder: 2, driverGender: 'male', description: 'Male drivers only' },
+  { name: 'Female Dorm – Block C', type: 'dorm', deliveryFee: 15, sortOrder: 3, driverGender: 'female', description: 'Female drivers only' },
   { name: 'Main Library', type: 'library', deliveryFee: 10, sortOrder: 4, description: 'Main entrance' },
   { name: 'Engineering Building', type: 'academic', deliveryFee: 10, sortOrder: 5 },
   { name: 'Main Gate', type: 'gate', deliveryFee: 10, sortOrder: 6 },
@@ -25,7 +25,7 @@ const SAMPLE_LOCATIONS = [
 async function seedDemo() {
   const users = [
     { telegramId: 1000001, firstName: 'Cafe', fullName: 'Demo Cafe Owner', username: 'demo_owner', phone: '0911000001', role: 'cafe_owner' },
-    { telegramId: 1000002, firstName: 'Student', fullName: 'Demo Student', username: 'demo_student', phone: '0911000002', role: 'customer' },
+    { telegramId: 1000002, firstName: 'Student', fullName: 'Demo Student', username: 'demo_student', phone: '0911000002', role: 'customer', userType: 'student', onboarded: true },
     {
       telegramId: 1000003,
       firstName: 'Driver',

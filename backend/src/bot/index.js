@@ -6,10 +6,19 @@ import { appButton, escapeHtml, setBot } from '../services/telegram.js';
 import { findOrCreateUser } from '../services/userService.js';
 import { tr } from '../i18n/messages.js';
 
-const menuButton = (lang) =>
+const menuButton = (lang, textKey = 'menuButton') =>
   env.MINI_APP_URL.startsWith('https://')
-    ? { type: 'web_app', text: tr(lang, 'menuButton'), web_app: { url: env.MINI_APP_URL } }
+    ? { type: 'web_app', text: tr(lang, textKey), web_app: { url: env.MINI_APP_URL } }
     : undefined;
+
+/** What /start says and opens, depending on who the user is */
+const ROLE_START = {
+  admin: { welcome: 'welcomeAdmin', button: 'btnAdminDash', menu: 'menuAdmin', path: '/admin' },
+  cafe_owner: { welcome: 'welcomeCafe', button: 'btnCafeDash', menu: 'menuCafe', path: '/cafe/orders' },
+  cafe_staff: { welcome: 'welcomeCafe', button: 'btnCafeDash', menu: 'menuCafe', path: '/cafe/orders' },
+  driver: { welcome: 'welcomeDriver', button: 'btnDriverDash', menu: 'menuDriver', path: '/driver' },
+  customer: { welcome: 'welcome', button: 'btnOrderFood', menu: 'menuButton', path: '/' },
+};
 
 function createBot() {
   const bot = new Bot(env.TELEGRAM_BOT_TOKEN);
@@ -19,19 +28,35 @@ function createBot() {
     const user = await findOrCreateUser(ctx.from);
     if (user.botBlocked) await User.updateOne({ _id: user._id }, { botBlocked: false });
     const lang = user.language;
+    const role = ROLE_START[user.role] || ROLE_START.customer;
+    const needsDetails = !user.fullName || !user.phone;
+    // Regular users also pick what they want to do (order / deliver / own a cafe) after their details
+    const isNewUser = user.role === 'customer' && !user.onboarded;
 
-    // Menu button next to the message box, in the user's language
-    const mb = menuButton(lang);
+    // Menu button next to the message box, in the user's language and for their role
+    const mb = menuButton(lang, isNewUser ? 'menuStart' : role.menu);
     if (mb) await ctx.api.setChatMenuButton({ chat_id: ctx.chat.id, menu_button: mb }).catch(() => {});
 
-    await ctx.reply(
-      tr(lang, 'welcome', {
-        name: escapeHtml(ctx.from.first_name),
-        app: escapeHtml(env.APP_NAME),
-        uni: escapeHtml(env.UNIVERSITY_NAME),
-      }),
-      { parse_mode: 'HTML', reply_markup: appButton(tr(lang, 'btnOrderFood'), '/') }
-    );
+    const vars = {
+      name: escapeHtml(ctx.from.first_name),
+      app: escapeHtml(env.APP_NAME),
+      uni: escapeHtml(env.UNIVERSITY_NAME),
+    };
+
+    let text;
+    let button;
+    if (isNewUser) {
+      // New person: details first, then "What do you want to do?"
+      text = tr(lang, 'welcomeNew', vars);
+      button = appButton(tr(lang, needsDetails ? 'btnSetup' : 'btnContinue'), '/');
+    } else {
+      // Admin, cafe, driver or a student who already chose
+      text = tr(lang, role.welcome, vars);
+      if (needsDetails) text += tr(lang, 'setupFirst');
+      button = appButton(tr(lang, needsDetails ? 'btnSetup' : role.button), needsDetails ? '/' : role.path);
+    }
+
+    await ctx.reply(text, { parse_mode: 'HTML', reply_markup: button });
   });
 
   bot.command('help', async (ctx) => {
@@ -93,7 +118,9 @@ export async function startBot() {
       console.log(`🤖 Bot @${bot.botInfo.username} running with long polling`);
     }
   } catch (err) {
-    console.error('❌ Could not start Telegram bot (check TELEGRAM_BOT_TOKEN):', err.message);
+    console.error('❌ Could not start Telegram bot:', err.message);
+    if (/401|Unauthorized|Not Found/i.test(err.message)) console.error('   → TELEGRAM_BOT_TOKEN looks wrong (get it again from @BotFather).');
+    if (/setWebhook/i.test(err.message)) console.error('   → Check BOT_WEBHOOK_URL (your backend https address) and BOT_WEBHOOK_SECRET (only A-Z a-z 0-9 _ -).');
   }
   return bot;
 }

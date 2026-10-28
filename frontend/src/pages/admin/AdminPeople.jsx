@@ -215,6 +215,7 @@ function Drivers() {
                   {dp.status === 'approved' && <Rating value={dp.rating} count={dp.ratingCount} />}
                 </div>
                 <div className="small muted">
+                  {d.userType ? `${t(`ut.${d.userType}`)} · ` : ''}
                   {t('ap.idLine', { id: dp.idNumber || '—', date: dateTime(dp.appliedAt) })}
                   {dp.status === 'approved' &&
                     ` · ${t('profile.deliveries', { n: dp.totalDeliveries })} · ${t('ap.wallet', { amount: money(dp.walletBalance) })}`}
@@ -303,6 +304,7 @@ function Users() {
             </div>
             <div className="small muted">
               {u.cafe?.name ? `🏪 ${u.cafe.name} · ` : ''}
+              {u.userType ? `${t(`ut.${u.userType}`)} · ` : ''}
               {u.studentId ? `ID ${u.studentId} · ` : ''}
               {t('ap.joined', { date: dateTime(u.createdAt) })}
               {u.botBlocked ? ` · ${t('ap.blockedBot')}` : ''}

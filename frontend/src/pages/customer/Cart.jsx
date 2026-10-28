@@ -115,7 +115,9 @@ export default function Cart() {
             ))}
           </select>
         </Field>
-        {location?.femaleOnly && <p className="small">{t('cart.femaleOnlyNote')}</p>}
+        {['female', 'male'].includes(location?.driverGender) && (
+          <p className="small">{t(location.driverGender === 'female' ? 'cart.femaleOnlyNote' : 'cart.maleOnlyNote')}</p>
+        )}
         {location?.description && <p className="muted small">ℹ️ {location.description}</p>}
         <Field label={t('pf.room')}>
           <input className="input" value={details} onChange={(e) => setDetails(e.target.value)} placeholder={t('pf.roomHint')} />

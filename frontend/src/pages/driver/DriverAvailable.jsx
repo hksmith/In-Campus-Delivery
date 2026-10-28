@@ -7,7 +7,7 @@ import { haptic } from '../../lib/telegram.js';
 import { toast } from '../../lib/toast.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useT } from '../../i18n/index.js';
-import { Async, Empty, StatusBadge, Toggle } from '../../components/ui.jsx';
+import { Async, Empty, GenderTag, StatusBadge, Toggle } from '../../components/ui.jsx';
 
 export function OnlineSwitch() {
   const t = useT();
@@ -46,7 +46,7 @@ export function Route({ order }) {
         <span className="muted small">{t('drv.deliverTo')}</span>
         <strong>{order.delivery?.locationName}</strong>
         {order.delivery?.details && <span className="muted small">{order.delivery.details}</span>}
-        {order.delivery?.femaleOnly && <span className="small">{t('common.femaleOnly')}</span>}
+        <GenderTag only={order.delivery?.driverGender} />
       </div>
     </div>
   );

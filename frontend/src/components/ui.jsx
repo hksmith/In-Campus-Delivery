@@ -272,6 +272,13 @@ export function OrderItems({ items }) {
   );
 }
 
+/** "♀ Female drivers only" / "♂ Male drivers only" – nothing for places open to everyone */
+export function GenderTag({ only, className = 'small' }) {
+  const t = useT();
+  if (only !== 'female' && only !== 'male') return null;
+  return <span className={className}>{t(only === 'female' ? 'common.femaleOnly' : 'common.maleOnly')}</span>;
+}
+
 export function Field({ label, hint, children }) {
   return (
     <label className="field">

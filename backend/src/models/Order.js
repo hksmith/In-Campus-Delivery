@@ -52,7 +52,7 @@ const orderSchema = new Schema(
       details: { type: String, maxlength: 120 }, // room / floor / landmark
       phone: String,
       recipientName: String,
-      femaleOnly: { type: Boolean, default: false },
+      driverGender: { type: String, enum: ['any', 'female', 'male'], default: 'any' },
     },
     note: { type: String, maxlength: 200 }, // note to the cafe
 

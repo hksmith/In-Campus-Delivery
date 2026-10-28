@@ -2,7 +2,7 @@ import { Location, Order } from '../models/index.js';
 import { ApiError } from '../utils/ApiError.js';
 import { pick } from '../utils/helpers.js';
 
-const FIELDS = ['name', 'type', 'description', 'deliveryFee', 'femaleOnly', 'isActive', 'sortOrder'];
+const FIELDS = ['name', 'type', 'description', 'deliveryFee', 'driverGender', 'isActive', 'sortOrder'];
 
 /** GET /api/locations – active drop-off points for checkout */
 export async function listActive(req, res) {

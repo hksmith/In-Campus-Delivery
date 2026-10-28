@@ -8,8 +8,8 @@ const locationSchema = new mongoose.Schema(
     type: { type: String, enum: LOCATION_TYPES, default: 'other' },
     description: { type: String, trim: true, maxlength: 200 }, // e.g. "Drop at the main gate"
     deliveryFee: { type: Number, required: true, min: 0 },
-    /** Only female drivers can deliver here (e.g. female dorms) */
-    femaleOnly: { type: Boolean, default: false },
+    /** Who may deliver here: any driver, or only female / only male drivers (single-gender dorms) */
+    driverGender: { type: String, enum: ['any', 'female', 'male'], default: 'any' },
     isActive: { type: Boolean, default: true },
     sortOrder: { type: Number, default: 0 },
   },

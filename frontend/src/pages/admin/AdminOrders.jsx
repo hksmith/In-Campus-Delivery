@@ -7,7 +7,7 @@ import { useSocketEvent } from '../../lib/socket.js';
 import { callPhone, confirmDialog, promptDialog } from '../../lib/telegram.js';
 import { toast } from '../../lib/toast.js';
 import { useT } from '../../i18n/index.js';
-import { Async, Empty, OrderItems, Sheet, StatusBadge, Tabs } from '../../components/ui.jsx';
+import { Async, Empty, GenderTag, OrderItems, Sheet, StatusBadge, Tabs } from '../../components/ui.jsx';
 
 function AssignSheet({ order, onClose, onDone }) {
   const t = useT();
@@ -21,11 +21,11 @@ function AssignSheet({ order, onClose, onDone }) {
       onClose();
     });
   const drivers = (data?.drivers || [])
-    .filter((d) => !order.delivery?.femaleOnly || d.gender === 'female')
+    .filter((d) => !['female', 'male'].includes(order.delivery?.driverGender) || d.gender === order.delivery.driverGender)
     .sort((a, b) => Number(b.driverProfile.isOnline) - Number(a.driverProfile.isOnline));
   return (
     <Sheet open title={t('ao.assignTitle', { n: order.orderNumber })} onClose={onClose}>
-      {order.delivery?.femaleOnly && <p className="small">{t('common.femaleOnly')}</p>}
+      <GenderTag only={order.delivery?.driverGender} className="small block" />
       {drivers.map((d) => (
         <button key={d._id} className="list-link" disabled={busy} onClick={() => assign(d)}>
           <span>
@@ -117,7 +117,7 @@ function AdminOrderCard({ order, onChanged, startOpen }) {
                 </button>
               )}
             </span>
-            {order.delivery?.femaleOnly && <span>{t('common.femaleOnly')}</span>}
+            <GenderTag only={order.delivery?.driverGender} className="" />
             <span>
               {t('ao.money', {
                 cp: money(order.cafePayout),

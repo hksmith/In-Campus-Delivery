@@ -9,7 +9,7 @@ import { toast } from '../../lib/toast.js';
 import { Async, Empty, Field, Sheet, Toggle } from '../../components/ui.jsx';
 import { useT } from '../../i18n/index.js';
 
-const blank = { name: '', type: 'dorm', description: '', deliveryFee: '', sortOrder: 0, femaleOnly: false, isActive: true };
+const blank = { name: '', type: 'dorm', description: '', deliveryFee: '', sortOrder: 0, driverGender: 'any', isActive: true };
 
 export default function AdminLocations() {
   const t = useT();
@@ -62,7 +62,7 @@ export default function AdminLocations() {
                 {l.name}
                 <span className="muted small block">
                   {t(`loc.${l.type}`)}
-                  {l.femaleOnly ? ` · ${t('common.femaleOnly')}` : ''}
+                  {l.driverGender === 'female' ? ` · ${t('common.femaleOnly')}` : l.driverGender === 'male' ? ` · ${t('common.maleOnly')}` : ''}
                   {l.description ? ` · ${l.description}` : ''}
                   {!l.isActive ? ` · ${t('al.hidden')}` : ''}
                 </span>
@@ -99,11 +99,13 @@ export default function AdminLocations() {
             <Field label={t('al.order')}>
               <input className="input" type="number" value={editing.sortOrder} onChange={set('sortOrder')} />
             </Field>
-            <Toggle
-              label={t('al.femaleOnly')}
-              checked={editing.femaleOnly}
-              onChange={(v) => setEditing((f) => ({ ...f, femaleOnly: v }))}
-            />
+            <Field label={t('al.whoDelivers')} hint={t('al.whoDeliversHint')}>
+              <select className="input" value={editing.driverGender || 'any'} onChange={set('driverGender')}>
+                <option value="any">{t('al.anyDriver')}</option>
+                <option value="female">{t('common.femaleOnly')}</option>
+                <option value="male">{t('common.maleOnly')}</option>
+              </select>
+            </Field>
             <Toggle label={t('al.visible')} checked={editing.isActive} onChange={(v) => setEditing((f) => ({ ...f, isActive: v }))} />
             <button className="btn btn--block" disabled={busy}>
               {t('common.save')}

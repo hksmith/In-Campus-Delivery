@@ -20,6 +20,7 @@ router.use(authenticate);
 // ── Auth / profile ──
 router.get('/auth/me', ah(auth.me));
 router.patch('/users/me', ah(users.updateMe));
+router.post('/users/me/start', ah(users.chooseStart));
 router.post('/users/me/driver-application', ah(users.applyAsDriver));
 router.get('/users/me/cafe-application', ah(users.myCafeApplication));
 

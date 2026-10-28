@@ -78,7 +78,7 @@ async function onlineDrivers(order) {
     'driverProfile.status': 'approved',
     'driverProfile.isOnline': true,
     isBanned: false,
-    ...(order.delivery?.femaleOnly ? { gender: 'female' } : {}),
+    ...(['female', 'male'].includes(order.delivery?.driverGender) ? { gender: order.delivery.driverGender } : {}),
   })
     .select(RECIPIENT_FIELDS)
     .lean();

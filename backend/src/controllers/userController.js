@@ -1,4 +1,5 @@
 import { Cafe, Location } from '../models/index.js';
+import { USER_TYPES, START_CHOICES } from '../models/User.js';
 import { ApiError } from '../utils/ApiError.js';
 import { pick } from '../utils/helpers.js';
 import { notifyAdmins, escapeHtml } from '../services/telegram.js';
@@ -9,8 +10,17 @@ const PHONE_RE = /^\+?[0-9 ()-]{7,20}$/;
 
 /** PATCH /api/users/me – update own profile */
 export async function updateMe(req, res) {
-  const data = pick(req.body, ['fullName', 'phone', 'studentId', 'defaultLocation', 'defaultLocationDetails', 'language']);
+  const data = pick(req.body, [
+    'fullName',
+    'phone',
+    'studentId',
+    'defaultLocation',
+    'defaultLocationDetails',
+    'language',
+    'userType',
+  ]);
   if (data.language !== undefined && !['en', 'am'].includes(data.language)) delete data.language;
+  if (data.userType !== undefined && !USER_TYPES.includes(data.userType)) delete data.userType;
 
   if (data.fullName !== undefined && String(data.fullName).trim().length < 2) {
     throw ApiError.badRequest('Please enter your full name');
@@ -31,6 +41,25 @@ export async function updateMe(req, res) {
   res.json({ user: req.user.toJSON() });
 }
 
+/**
+ * POST /api/users/me/start – the "What do you want to do?" screen after entering details.
+ * Body: { userType: student|teacher|staff|other, choice: order|deliver|cafe }
+ * Ordering needs nothing else; deliver / cafe continue to their application form.
+ */
+export async function chooseStart(req, res) {
+  const user = req.user;
+  if (!user.isProfileComplete) throw ApiError.badRequest('Please complete your profile first');
+  const { userType, choice } = req.body || {};
+  if (!USER_TYPES.includes(userType)) throw ApiError.badRequest('Please choose who you are');
+  if (!START_CHOICES.includes(choice)) throw ApiError.badRequest('Please choose what you want to do');
+
+  user.userType = userType;
+  user.startChoice = choice;
+  user.onboarded = true;
+  await user.save();
+  res.json({ user: user.toJSON() });
+}
+
 /** POST /api/users/me/driver-application */
 export async function applyAsDriver(req, res) {
   const user = req.user;
@@ -39,7 +68,7 @@ export async function applyAsDriver(req, res) {
   if (user.driverProfile?.status === 'pending') throw ApiError.badRequest('Your application is already under review');
 
   const idNumber = String(req.body.idNumber || '').trim();
-  if (idNumber.length < 3) throw ApiError.badRequest('Please enter your student ID number');
+  if (idNumber.length < 3) throw ApiError.badRequest('Please enter your university ID number');
   if (!['male', 'female'].includes(req.body.gender)) throw ApiError.badRequest('Please choose your gender');
   user.gender = req.body.gender;
 

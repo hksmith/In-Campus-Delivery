@@ -3,6 +3,9 @@ import { ROLE_LIST, DRIVER_STATUS } from '../config/constants.js';
 
 const { Schema } = mongoose;
 
+export const USER_TYPES = ['student', 'teacher', 'staff', 'other'];
+export const START_CHOICES = ['order', 'deliver', 'cafe'];
+
 const driverProfileSchema = new Schema(
   {
     status: { type: String, enum: DRIVER_STATUS, default: 'none' },
@@ -37,8 +40,13 @@ const userSchema = new Schema(
     studentId: { type: String, trim: true, maxlength: 40 },
     defaultLocation: { type: Schema.Types.ObjectId, ref: 'Location' },
     defaultLocationDetails: { type: String, trim: true, maxlength: 120 }, // room / floor / landmark
-    gender: { type: String, enum: ['male', 'female'] }, // required for drivers (female-only dorms)
+    gender: { type: String, enum: ['male', 'female'] }, // required for drivers (single-gender dorms)
     language: { type: String, enum: ['en', 'am'], default: 'en' },
+    userType: { type: String, enum: USER_TYPES }, // student / teacher / staff / other
+    /** What they picked on the "What do you want to do?" screen (order / deliver / cafe) */
+    startChoice: { type: String, enum: START_CHOICES },
+    /** True once they passed the "What do you want to do?" screen */
+    onboarded: { type: Boolean, default: false },
 
     // ── Access ──
     role: { type: String, enum: ROLE_LIST, default: 'customer', index: true },

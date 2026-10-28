@@ -7,14 +7,23 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { useT } from '../../i18n/index.js';
 import { Field } from '../../components/ui.jsx';
 
-/** Name / phone / student ID / default delivery spot – used by onboarding and profile */
-export default function ProfileForm({ submitLabel, onSaved }) {
+const USER_TYPES = ['student', 'teacher', 'staff', 'other'];
+
+/**
+ * Profile form.
+ * - minimal: only name + phone (first screen when someone opens the app)
+ * - full (Profile page): also "I am a", student ID and usual delivery place
+ */
+export default function ProfileForm({ submitLabel, onSaved, minimal = false }) {
   const t = useT();
   const { user, setUser } = useAuth();
-  const { data } = useApi('/locations');
+  // Admins and cafe staff don't order to a dorm, so they only need name + phone
+  const orders = !minimal && ['customer', 'driver'].includes(user.role);
+  const { data } = useApi(orders ? '/locations' : null);
   const [form, setForm] = useState({
     fullName: user.fullName || [user.firstName, user.lastName].filter(Boolean).join(' '),
     phone: user.phone || '',
+    userType: user.userType || '',
     studentId: user.studentId || '',
     defaultLocation: user.defaultLocation?._id || user.defaultLocation || '',
     defaultLocationDetails: user.defaultLocationDetails || '',
@@ -30,7 +39,13 @@ export default function ProfileForm({ submitLabel, onSaved }) {
   const submit = (e) => {
     e.preventDefault();
     run(async () => {
-      const { data: res } = await api.patch('/users/me', form);
+      const body = minimal
+        ? { fullName: form.fullName, phone: form.phone }
+        : orders
+          ? { ...form }
+          : { fullName: form.fullName, phone: form.phone };
+      if (!body.userType) delete body.userType;
+      const { data: res } = await api.patch('/users/me', body);
       setUser(res.user);
       onSaved?.(res.user);
     });
@@ -49,22 +64,36 @@ export default function ProfileForm({ submitLabel, onSaved }) {
           </button>
         </div>
       </Field>
-      <Field label={t('pf.studentId')}>
-        <input className="input" value={form.studentId} onChange={set('studentId')} placeholder="UGR/1234/15" />
-      </Field>
-      <Field label={t('pf.usualPlace')}>
-        <select className="input" value={form.defaultLocation} onChange={set('defaultLocation')}>
-          <option value="">{t('pf.choose')}</option>
-          {data?.locations?.map((l) => (
-            <option key={l._id} value={l._id}>
-              {l.name} · {money(l.deliveryFee)}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field label={t('pf.room')} hint={t('pf.roomHint')}>
-        <input className="input" value={form.defaultLocationDetails} onChange={set('defaultLocationDetails')} />
-      </Field>
+      {orders && (
+        <>
+          <Field label={t('pf.userType')}>
+            <select className="input" value={form.userType} onChange={set('userType')}>
+              <option value="">{t('pf.choose')}</option>
+              {USER_TYPES.map((u) => (
+                <option key={u} value={u}>
+                  {t(`ut.${u}`)}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label={t('pf.studentId')}>
+            <input className="input" value={form.studentId} onChange={set('studentId')} placeholder="UGR/1234/15" />
+          </Field>
+          <Field label={t('pf.usualPlace')}>
+            <select className="input" value={form.defaultLocation} onChange={set('defaultLocation')}>
+              <option value="">{t('pf.choose')}</option>
+              {data?.locations?.map((l) => (
+                <option key={l._id} value={l._id}>
+                  {l.name} · {money(l.deliveryFee)}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label={t('pf.room')} hint={t('pf.roomHint')}>
+            <input className="input" value={form.defaultLocationDetails} onChange={set('defaultLocationDetails')} />
+          </Field>
+        </>
+      )}
       <button className="btn btn--block" disabled={busy}>
         {busy ? t('common.saving') : submitLabel || t('common.save')}
       </button>

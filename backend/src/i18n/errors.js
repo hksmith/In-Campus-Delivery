@@ -4,7 +4,9 @@
  * is shown in English.
  */
 const exact = {
-  'Add a note explaining why': 'ምክንያቱን የሚያስረዳ ማስታወሻ ያስገቡ',
+  'Please choose who you are': 'እባክዎ ማን እንደሆኑ ይምረጡ',
+  'Please choose what you want to do': 'እባክዎ ምን ማድረግ እንደሚፈልጉ ይምረጡ',
+  'Add a note explaining why':'ምክንያቱን የሚያስረዳ ማስታወሻ ያስገቡ',
   'Already reported – the admin is on it': 'አስቀድሞ ሪፖርት ተደርጓል – አስተዳዳሪው እየተከታተለው ነው',
   'Amount is too large': 'መጠኑ በጣም ትልቅ ነው',
   'An item in your cart no longer exists. Please refresh the menu.': 'በጋሪዎ ያለ አንድ ምግብ ከሜኑው ተነስቷል። እባክዎ ሜኑውን ያድሱ።',
@@ -37,6 +39,9 @@ const exact = {
   'No image received': 'ምንም ምስል አልደረሰም',
   'No user with that username. Ask them to open the app once first.': 'በዚህ ዩዘርኔም ተጠቃሚ የለም። መጀመሪያ መተግበሪያውን አንድ ጊዜ እንዲከፍቱ ይንገሯቸው።',
   'Only female drivers can deliver to this location': 'ወደዚህ ቦታ ማድረስ የሚችሉት ሴት አድራሾች ብቻ ናቸው',
+  'Only male drivers can deliver to this location': 'ወደዚህ ቦታ ማድረስ የሚችሉት ወንድ አድራሾች ብቻ ናቸው',
+  'This location is female-only. Choose a female driver.': 'ይህ ቦታ ለሴቶች ብቻ ነው። ሴት አድራሽ ይምረጡ።',
+  'This location is male-only. Choose a male driver.': 'ይህ ቦታ ለወንዶች ብቻ ነው። ወንድ አድራሽ ይምረጡ።',
   'Only images are allowed': 'ምስሎች ብቻ ይፈቀዳሉ',
   'Only regular users can apply to become a driver': 'አድራሽ ለመሆን ማመልከት የሚችሉት መደበኛ ተጠቃሚዎች ብቻ ናቸው',
   'Only regular users can register a cafe': 'ካፌ ማስመዝገብ የሚችሉት መደበኛ ተጠቃሚዎች ብቻ ናቸው',
@@ -48,7 +53,7 @@ const exact = {
   'Please complete your profile first': 'እባክዎ መጀመሪያ መገለጫዎን ያሟሉ',
   'Please enter a valid phone number': 'እባክዎ ትክክለኛ ስልክ ቁጥር ያስገቡ',
   'Please enter your full name': 'እባክዎ ሙሉ ስምዎን ያስገቡ',
-  'Please enter your student ID number': 'እባክዎ የተማሪ መታወቂያ ቁጥርዎን ያስገቡ',
+  'Please enter your university ID number': 'እባክዎ የዩኒቨርሲቲ መታወቂያ ቁጥርዎን ያስገቡ',
   'Please give a reason so the student understands': 'ተማሪው እንዲረዳ እባክዎ ምክንያት ይስጡ',
   'Please open this app from Telegram': 'እባክዎ ይህን መተግበሪያ ከቴሌግራም ይክፈቱ',
   'Please rate the cafe from 1 to 5': 'እባክዎ ካፌውን ከ1 እስከ 5 ይገምግሙ',

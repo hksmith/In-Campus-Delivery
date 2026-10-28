@@ -151,8 +151,9 @@ export async function assignDriver(req, res) {
   assertObjectId(req.body.driverId, 'driver');
   const driver = await User.findOne({ _id: req.body.driverId, role: 'driver', 'driverProfile.status': 'approved' });
   if (!driver) throw ApiError.badRequest('Driver not found or not approved');
-  if (order.delivery?.femaleOnly && driver.gender !== 'female') {
-    throw ApiError.badRequest('This location is female-only. Choose a female driver.');
+  const only = order.delivery?.driverGender;
+  if (['female', 'male'].includes(only) && driver.gender !== only) {
+    throw ApiError.badRequest(only === 'female' ? 'This location is female-only. Choose a female driver.' : 'This location is male-only. Choose a male driver.');
   }
   const previousDriverId = order.driver && String(order.driver) !== String(driver._id) ? order.driver : null;
   order.driver = driver._id;
@@ -251,7 +252,7 @@ export async function listDrivers(req, res) {
     : { 'driverProfile.status': { $ne: 'none' } };
   const drivers = await User.find(filter)
     .sort({ 'driverProfile.appliedAt': -1 })
-    .select('fullName firstName username phone studentId telegramId role driverProfile createdAt');
+    .select('fullName firstName username phone studentId userType gender telegramId role driverProfile createdAt');
   res.json({ drivers: drivers.map((d) => d.toJSON()) });
 }
 

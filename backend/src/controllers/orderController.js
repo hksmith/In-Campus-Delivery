@@ -88,7 +88,7 @@ export async function createOrder(req, res) {
       details: locationDetails ? String(locationDetails).slice(0, 120) : user.defaultLocationDetails,
       phone: user.phone,
       recipientName: user.fullName,
-      femaleOnly: location.femaleOnly,
+      driverGender: location.driverGender || 'any',
     },
     note: note ? String(note).slice(0, 200) : undefined,
     deliveryCode: String(crypto.randomInt(1000, 10000)),

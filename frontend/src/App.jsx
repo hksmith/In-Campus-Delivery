@@ -9,6 +9,7 @@ import Layout from './components/Layout.jsx';
 import { Loader } from './components/ui.jsx';
 
 import Onboarding from './pages/shared/Onboarding.jsx';
+import ChooseStart from './pages/shared/ChooseStart.jsx';
 import Profile from './pages/shared/Profile.jsx';
 import ApplyDriver from './pages/shared/ApplyDriver.jsx';
 import RegisterCafe from './pages/shared/RegisterCafe.jsx';
@@ -56,9 +57,10 @@ export default function App() {
 
   // When a cafe owner / driver / admin opens the app, start on their dashboard
   useEffect(() => {
-    if (!user || redirected.current) return;
+    // Wait until the profile is set up, so first-time admins/owners/drivers also land on their dashboard
+    if (!user || !user.isProfileComplete || redirected.current) return;
     redirected.current = true;
-    if (pathname === '/' && user.role !== 'customer' && user.isProfileComplete) {
+    if (pathname === '/' && user.role !== 'customer') {
       navigate(ROLE_HOME[user.role], { replace: true });
     }
   }, [user, pathname, navigate]);
@@ -67,7 +69,11 @@ export default function App() {
   if (loading) return <Loader full label={t('common.opening')} />;
   if (errorCode === 'BANNED' || errorCode === 403) return <BlockedScreen message={error} />;
   if (error || !user) return <BlockedScreen message={error || t('screen.couldNotLoad')} onRetry={refresh} />;
+  // Step 1: everyone enters name + phone
   if (!user.isProfileComplete) return <Onboarding />;
+  // Step 2: regular users choose what they want to do (order / deliver / own a cafe).
+  // Admins, cafe accounts and drivers skip this and go to their dashboard.
+  if (user.role === 'customer' && !user.onboarded) return <ChooseStart />;
 
   return (
     <>

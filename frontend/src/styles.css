@@ -1136,6 +1136,78 @@ textarea.input {
   font-size: 54px;
 }
 
+/* ── "What do you want to do?" screen ── */
+.who-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.choice--active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+.choice__icon {
+  font-size: 30px;
+  flex: none;
+}
+.choice__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.choice__check {
+  margin-left: auto;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  color: var(--accent-text);
+}
+.choice--active .choice__check {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.step-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.step-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line);
+}
+.step-dots span.on {
+  background: var(--accent);
+  width: 22px;
+  border-radius: 999px;
+}
+
 /* ── Language switch, wallet ── */
 .lang-switch {
   display: inline-flex;

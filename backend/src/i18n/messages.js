@@ -17,6 +17,31 @@ const en = {
   btnDashboard: 'Open dashboard',
   btnStartDelivering: 'Start delivering',
   menuButton: 'Order',
+  menuAdmin: 'Admin',
+  menuCafe: 'Orders',
+  menuDriver: 'Deliver',
+  menuStart: 'Start',
+  btnSetup: '📝 Enter my details',
+  btnAdminDash: '⚙️ Open admin dashboard',
+  btnCafeDash: '🍽 Open cafe orders',
+  btnDriverDash: '🛵 Open deliveries',
+
+  // Role-based /start messages
+  welcomeAdmin:
+    '👋 Hi {name}!\n\nYou are the <b>admin</b> of <b>{app}</b> at {uni}.\n\n' +
+    '📊 See all orders and money\n🏪 Approve cafes and 🛵 drivers\n⚙️ Set fees, dorms and wallet rules\n\nTap the button below to open your dashboard.',
+  welcomeCafe:
+    '👋 Hi {name}!\n\nThis is your <b>cafe dashboard</b> on <b>{app}</b>.\n\n' +
+    '🔔 Accept new orders\n🍽 Manage your menu\n📈 See your sales\n\nTap the button below to open it.',
+  welcomeDriver:
+    '👋 Hi {name}!\n\nReady to deliver on <b>{app}</b>?\n\n' +
+    '📦 Pick orders near you\n💰 Earn the delivery fee\n👛 Keep your wallet topped up\n\nTap the button below to open your deliveries.',
+  setupFirst: '\n\n📝 <b>First, enter your details</b> (name and phone number) – it takes 30 seconds.',
+  welcomeNew:
+    '👋 Hi {name}!\n\nWelcome to <b>{app}</b> at {uni}.\n\n' +
+    '🍔 Order food from campus cafes\n🛵 Deliver orders and earn money\n🏪 Get orders for your cafe\n\n' +
+    '📝 <b>First, enter your details</b>, then choose what you want to do.',
+  btnContinue: '📝 Continue',
 
   // Bot commands
   welcome:
@@ -100,6 +125,30 @@ const am = {
   btnDashboard: 'ዳሽቦርድ ክፈት',
   btnStartDelivering: 'ማድረስ ይጀምሩ',
   menuButton: 'ይዘዙ',
+  menuAdmin: 'አስተዳዳሪ',
+  menuCafe: 'ትዕዛዞች',
+  menuDriver: 'ማድረስ',
+  menuStart: 'ጀምር',
+  btnSetup: '📝 መረጃዬን አስገባ',
+  btnAdminDash: '⚙️ የአስተዳዳሪ ገጽ ክፈት',
+  btnCafeDash: '🍽 የካፌ ትዕዛዞችን ክፈት',
+  btnDriverDash: '🛵 ማድረሻዎችን ክፈት',
+
+  welcomeAdmin:
+    '👋 ሰላም {name}!\n\nእርስዎ የ{uni} <b>{app}</b> <b>አስተዳዳሪ</b> ነዎት።\n\n' +
+    '📊 ሁሉንም ትዕዛዞችና ገንዘብ ይመልከቱ\n🏪 ካፌዎችንና 🛵 አድራሾችን ያጽድቁ\n⚙️ ክፍያዎችን፣ ዶርሞችንና የዋሌት ደንቦችን ያስተካክሉ\n\nገጽዎን ለመክፈት ከታች ያለውን ቁልፍ ይጫኑ።',
+  welcomeCafe:
+    '👋 ሰላም {name}!\n\nይህ በ<b>{app}</b> ላይ ያለው <b>የካፌዎ ገጽ</b> ነው።\n\n' +
+    '🔔 አዳዲስ ትዕዛዞችን ይቀበሉ\n🍽 ሜኑዎን ያስተዳድሩ\n📈 ሽያጭዎን ይመልከቱ\n\nለመክፈት ከታች ያለውን ቁልፍ ይጫኑ።',
+  welcomeDriver:
+    '👋 ሰላም {name}!\n\nበ<b>{app}</b> ለማድረስ ዝግጁ ነዎት?\n\n' +
+    '📦 በአቅራቢያዎ ያሉ ትዕዛዞችን ይምረጡ\n💰 የማድረሻ ክፍያውን ያግኙ\n👛 ዋሌትዎን ይሙሉ\n\nማድረሻዎችዎን ለመክፈት ከታች ያለውን ቁልፍ ይጫኑ።',
+  setupFirst: '\n\n📝 <b>መጀመሪያ መረጃዎን ያስገቡ</b> (ስምና ስልክ ቁጥር) – 30 ሰከንድ ብቻ ይወስዳል።',
+  welcomeNew:
+    '👋 ሰላም {name}!\n\nወደ {uni} <b>{app}</b> እንኳን ደህና መጡ።\n\n' +
+    '🍔 ከግቢ ካፌዎች ምግብ ይዘዙ\n🛵 ትዕዛዞችን አድርሰው ገንዘብ ያግኙ\n🏪 ለካፌዎ ትዕዛዞችን ይቀበሉ\n\n' +
+    '📝 <b>መጀመሪያ መረጃዎን ያስገቡ</b>፣ ከዚያ ምን ማድረግ እንደሚፈልጉ ይምረጡ።',
+  btnContinue: '📝 ይቀጥሉ',
 
   welcome:
     '👋 ሰላም {name}!\n\nወደ <b>{app}</b> እንኳን ደህና መጡ – ከ{uni} ካፌዎች የሚመጣ ምግብ፣ እስከ ዶርምዎ ወይም ህንጻዎ ድረስ።\n\n' +

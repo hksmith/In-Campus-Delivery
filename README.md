@@ -15,17 +15,28 @@ campus-delivery/
 
 | Role | What they do |
 |---|---|
-| **Student (customer)** | Browse cafes, order, track live, give the delivery code, rate |
+| **Customer** (student, teacher, staff…) | Browse cafes, order, track live, give the delivery code, rate |
 | **Cafe owner** | Accept/decline orders, manage menu & sold-out items, staff, stats, reviews |
 | **Cafe staff** | Accept orders and toggle sold-out items (no prices, stats or staff) |
-| **Driver** (students) | Prepaid wallet, go online, take orders, pay the cafe at pickup, confirm delivery with code, earnings |
+| **Driver** (students or staff) | Prepaid wallet, go online, take orders, pay the cafe at pickup, confirm delivery with code, earnings |
 | **Admin** | Approve cafes/drivers, all orders, reassign/cancel, locations & fees, commission, driver wallets & top-ups, broadcast |
 
 Everyone can also order food. Drivers, cafe staff and admins switch with the **🍔 Order food / 💼 Dashboard** button.
 
-Nobody picks their own role. Everyone starts as a student, then **applies** in Profile
-(“Become a driver” / “Register your cafe”) and the admin approves. Admins are set with
-`ADMIN_TELEGRAM_IDS` in the backend `.env`.
+### First time someone opens the app
+
+1. **/start** – the bot explains the app and shows **📝 Enter my details**.
+2. **Step 1 – details:** full name + phone number (everyone, including the admin).
+3. **Step 2 – “What do you want to do?”** (regular users only):
+   - *I am a…* Student / Teacher / Staff / Other
+   - *I want to…* **Order food** → home screen · **Deliver and earn** → driver application ·
+     **Register my cafe** → cafe registration
+4. Drivers and cafes wait for the admin to approve them, and can order food meanwhile.
+
+**Admins** (set with `ADMIN_TELEGRAM_IDS` in the backend `.env`) skip step 2: after their details
+they go straight to the admin dashboard, and `/start` shows **⚙️ Open admin dashboard**.
+Approved cafe owners and drivers get their own `/start` message and button the same way.
+Nobody can give themselves a role – deliver/cafe are only *applications* the admin approves.
 
 ## 2. Order flow
 
@@ -103,10 +114,11 @@ check starts failing, top-ups fall back to admin review (no money is lost), and 
 **Other protections:** the cafe sees how much the driver must pay at pickup and can tap **"Driver didn't pay"**;
 deliveries complete only with the student's 4-digit code; every wallet change is in a ledger.
 
-### Female-only drop-offs
+### Single-gender dorms
 
-Mark a location (e.g. female dorms) as **Female drivers only** in Admin → Locations. Those orders are hidden from male
-drivers, can't be claimed or assigned to them, and only female drivers get the bot alert. Drivers choose their gender
+Each location has **Who can deliver here**: *Any driver*, *Female drivers only* or *Male drivers only*
+(Admin → More → Delivery locations). Female dorms get female drivers, male dorms get male drivers: other drivers don't
+see those orders, can't take them, can't be assigned them, and don't get the bot alert. Drivers choose their gender
 when applying; the admin can correct it in People → Drivers.
 
 ### Languages (English / አማርኛ)
@@ -131,7 +143,7 @@ Have a native speaker review the Amharic before launch.
 | 7 | Cafe commission and platform cut of the delivery fee (percent or fixed birr) | – | Admin → More → Platform settings |
 | 8 | Your Telebirr number + name and/or CBE account + name (where drivers send top-ups) | Exactly as shown on receipts | `backend/.env` `TELEBIRR_RECEIVER_*`, `CBE_RECEIVER_*` |
 | 8b | Where the backend runs: in Ethiopia, or abroad + relay / Verify.ET | See "Automatic top-up verification" | `backend/.env` `VERIFY_RELAY_*` or `VERIFYET_*` |
-| 9 | Which locations are female-only | – | Admin → More → Delivery locations |
+| 9 | Which dorms are female-only and which are male-only | – | Admin → More → Delivery locations |
 
 In Atlas → Network Access, allow `0.0.0.0/0` (or your server's IP) so the backend can connect.
 

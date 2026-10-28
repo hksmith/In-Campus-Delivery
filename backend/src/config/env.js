@@ -1,4 +1,17 @@
 import 'dotenv/config';
+import crypto from 'node:crypto';
+
+/**
+ * Telegram only accepts A-Z a-z 0-9 _ - (1–256 chars) as a webhook secret.
+ * Any other value is turned into a safe one (its SHA-256 hash) so the bot still starts.
+ */
+function safeWebhookSecret(value) {
+  const v = String(value || '').trim();
+  if (!v) return '';
+  if (/^[A-Za-z0-9_-]{1,256}$/.test(v)) return v;
+  console.warn('⚠️  BOT_WEBHOOK_SECRET had characters Telegram does not allow – using a hashed version instead.');
+  return crypto.createHash('sha256').update(v).digest('hex');
+}
 
 const list = (value) =>
   (value || '')
@@ -25,7 +38,7 @@ export const env = {
   ENABLE_BOT: process.env.ENABLE_BOT !== 'false',
   MINI_APP_URL: (process.env.MINI_APP_URL || '').replace(/\/$/, ''),
   BOT_WEBHOOK_URL: (process.env.BOT_WEBHOOK_URL || '').replace(/\/$/, ''),
-  BOT_WEBHOOK_SECRET: process.env.BOT_WEBHOOK_SECRET || '',
+  BOT_WEBHOOK_SECRET: safeWebhookSecret(process.env.BOT_WEBHOOK_SECRET),
 
   ADMIN_TELEGRAM_IDS: list(process.env.ADMIN_TELEGRAM_IDS).map(Number).filter(Number.isFinite),
   CORS_ORIGINS: list(process.env.CORS_ORIGINS),
