@@ -1,0 +1,125 @@
+/**
+ * Amharic versions of API error messages. The error handler translates the
+ * English message when the signed-in user chose Amharic. Anything missing here
+ * is shown in English.
+ */
+const exact = {
+  'Add a note explaining why': 'ምክንያቱን የሚያስረዳ ማስታወሻ ያስገቡ',
+  'Already reported – the admin is on it': 'አስቀድሞ ሪፖርት ተደርጓል – አስተዳዳሪው እየተከታተለው ነው',
+  'Amount is too large': 'መጠኑ በጣም ትልቅ ነው',
+  'An item in your cart no longer exists. Please refresh the menu.': 'በጋሪዎ ያለ አንድ ምግብ ከሜኑው ተነስቷል። እባክዎ ሜኑውን ያድሱ።',
+  'Another driver already took this order': 'ሌላ አድራሽ ይህን ትዕዛዝ አስቀድሞ ወስዷል',
+  'Cafe accounts only': 'ለካፌ መለያዎች ብቻ',
+  'Cafe name is required': 'የካፌ ስም ያስፈልጋል',
+  'Cafe not found': 'ካፌው አልተገኘም',
+  'Drivers only': 'ለአድራሾች ብቻ',
+  'Driver rating must be 1 to 5': 'የአድራሹ ደረጃ ከ1 እስከ 5 መሆን አለበት',
+  'Enter the Telegram username': 'የቴሌግራም ዩዘርኔም ያስገቡ',
+  'Enter the amount you sent': 'የላኩትን መጠን ያስገቡ',
+  'Choose how you paid': 'የከፈሉበትን መንገድ ይምረጡ',
+  'Only Telebirr and CBE payments can be checked automatically': 'በራስ-ሰር ማረጋገጥ የሚቻለው የቴሌብርና የሲቢኢ ክፍያዎችን ብቻ ነው',
+  'Telebirr has no receipt with this transaction ID': 'በዚህ የግብይት ቁጥር የቴሌብር ደረሰኝ የለም',
+  'CBE has no receipt for this reference': 'በዚህ ቁጥር የሲቢኢ ደረሰኝ የለም',
+  'Could not read the CBE receipt': 'የሲቢኢ ደረሰኙን ማንበብ አልተቻለም',
+  'Enter the last 8 digits of the account you paid from': 'የከፈሉበትን አካውንት የመጨረሻ 8 አሃዞች ያስገቡ',
+  'A Telebirr transaction ID has 10 letters/numbers, e.g. CJK4ABC12D': 'የቴሌብር የግብይት ቁጥር 10 ፊደሎች/ቁጥሮች አሉት፣ ለምሳሌ CJK4ABC12D',
+  'A CBE reference starts with FT and has 12 characters, e.g. FT25123ABC45': 'የሲቢኢ ቁጥር በFT ይጀምራል፣ 12 ፊደሎች አሉት፣ ለምሳሌ FT25123ABC45',
+  'The receipt reference does not match': 'የደረሰኙ ቁጥር አይዛመድም',
+  'Receipt not found': 'ደረሰኙ አልተገኘም',
+  'This payment was not sent to our account': 'ይህ ክፍያ ወደ እኛ አካውንት አልተላከም',
+  'Enter the transaction ID from your payment SMS / receipt': 'ከክፍያ ኤስኤምኤስ / ደረሰኝ ላይ ያለውን የግብይት መለያ ቁጥር ያስገቡ',
+  'Go online first to take deliveries': 'ማድረሻ ለመውሰድ መጀመሪያ ኦንላይን ይሁኑ',
+  'Image upload is not configured on the server (Cloudinary keys missing)': 'የምስል መጫኛ ገና አልተዘጋጀም',
+  'Invalid amount': 'ትክክለኛ ያልሆነ መጠን',
+  'Location not found': 'ቦታው አልተገኘም',
+  'Mark the order as picked up first': 'መጀመሪያ ትዕዛዙን እንደወሰዱት ምልክት ያድርጉ',
+  'Menu item not found': 'የሜኑ ምግቡ አልተገኘም',
+  'No image received': 'ምንም ምስል አልደረሰም',
+  'No user with that username. Ask them to open the app once first.': 'በዚህ ዩዘርኔም ተጠቃሚ የለም። መጀመሪያ መተግበሪያውን አንድ ጊዜ እንዲከፍቱ ይንገሯቸው።',
+  'Only female drivers can deliver to this location': 'ወደዚህ ቦታ ማድረስ የሚችሉት ሴት አድራሾች ብቻ ናቸው',
+  'Only images are allowed': 'ምስሎች ብቻ ይፈቀዳሉ',
+  'Only regular users can apply to become a driver': 'አድራሽ ለመሆን ማመልከት የሚችሉት መደበኛ ተጠቃሚዎች ብቻ ናቸው',
+  'Only regular users can register a cafe': 'ካፌ ማስመዝገብ የሚችሉት መደበኛ ተጠቃሚዎች ብቻ ናቸው',
+  'Only the cafe owner can do this': 'ይህን ማድረግ የሚችለው የካፌው ባለቤት ብቻ ነው',
+  'Order is already finished': 'ትዕዛዙ አስቀድሞ ተጠናቋል',
+  'Order not found': 'ትዕዛዙ አልተገኘም',
+  'Please choose a valid delivery location': 'እባክዎ ትክክለኛ የማድረሻ ቦታ ይምረጡ',
+  'Please choose your gender': 'እባክዎ ጾታዎን ይምረጡ',
+  'Please complete your profile first': 'እባክዎ መጀመሪያ መገለጫዎን ያሟሉ',
+  'Please enter a valid phone number': 'እባክዎ ትክክለኛ ስልክ ቁጥር ያስገቡ',
+  'Please enter your full name': 'እባክዎ ሙሉ ስምዎን ያስገቡ',
+  'Please enter your student ID number': 'እባክዎ የተማሪ መታወቂያ ቁጥርዎን ያስገቡ',
+  'Please give a reason so the student understands': 'ተማሪው እንዲረዳ እባክዎ ምክንያት ይስጡ',
+  'Please open this app from Telegram': 'እባክዎ ይህን መተግበሪያ ከቴሌግራም ይክፈቱ',
+  'Please rate the cafe from 1 to 5': 'እባክዎ ካፌውን ከ1 እስከ 5 ይገምግሙ',
+  'Review not found': 'ግምገማው አልተገኘም',
+  'Someone else already handled this top-up': 'ይህ ክፍያ በሌላ ሰው አስቀድሞ ተስተናግዷል',
+  'Staff member not found': 'ሰራተኛው አልተገኘም',
+  'Telegram data signature is invalid': 'የቴሌግራም መረጃ ትክክል አይደለም',
+  'Telegram session expired, please reopen the app': 'የቴሌግራም ክፍለ ጊዜ አልፏል፤ እባክዎ መተግበሪያውን እንደገና ይክፈቱ',
+  'The cafe already accepted this order. Contact the cafe or admin to cancel.':
+    'ካፌው ትዕዛዙን አስቀድሞ ተቀብሏል። ለመሰረዝ ካፌውን ወይም አስተዳዳሪውን ያነጋግሩ።',
+  'This transaction ID was already used': 'ይህ የግብይት መለያ ቁጥር አስቀድሞ ጥቅም ላይ ውሏል',
+  'This user already has another role': 'ይህ ተጠቃሚ ሌላ ሚና አለው',
+  'Too many items in one order': 'በአንድ ትዕዛዝ ውስጥ በጣም ብዙ ምግቦች',
+  'Too many wrong codes. Ask the admin to confirm this delivery.': 'በጣም ብዙ የተሳሳቱ ኮዶች። ይህን ማድረሻ አስተዳዳሪው እንዲያረጋግጥ ይጠይቁ።',
+  'Unknown delivery location': 'ያልታወቀ የማድረሻ ቦታ',
+  'You already have top-ups waiting for approval': 'ማረጋገጫ የሚጠብቁ የክፍያ ጥያቄዎች አሉዎት',
+  'You already rated this order': 'ይህን ትዕዛዝ አስቀድመው ገምግመዋል',
+  'You already registered a cafe': 'አስቀድመው ካፌ አስመዝግበዋል',
+  'You can only release orders you have not picked up yet': 'መመለስ የሚችሉት ገና ያልወሰዷቸውን ትዕዛዞች ብቻ ነው',
+  'You can rate an order after it is delivered': 'ትዕዛዙን መገምገም የሚችሉት ከደረሰ በኋላ ነው',
+  'You have a pending driver application': 'በሂደት ላይ ያለ የአድራሽ ማመልከቻ አለዎት',
+  'Your application is already under review': 'ማመልከቻዎ በግምገማ ላይ ነው',
+  'Your cafe is suspended. Contact the admin.': 'ካፌዎ ታግዷል። አስተዳዳሪውን ያነጋግሩ።',
+  'Your cart is empty': 'ጋሪዎ ባዶ ነው',
+  'Your driver account is not active. Contact the admin.': 'የአድራሽ መለያዎ ንቁ አይደለም። አስተዳዳሪውን ያነጋግሩ።',
+  'You are not allowed to do this': 'ይህን ለማድረግ ፈቃድ የለዎትም',
+  'Not found': 'አልተገኘም',
+  'Too many requests, slow down a little.': 'በጣም ብዙ ጥያቄዎች፤ ትንሽ ቀስ ይበሉ።',
+  'Something went wrong. Please try again.': 'የሆነ ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።',
+  'This order was just updated by someone else. Please refresh and try again.':
+    'ይህ ትዕዛዝ አሁን በሌላ ሰው ተቀይሯል። እባክዎ ያድሱና እንደገና ይሞክሩ።',
+};
+
+const STATUS_AM = {
+  pending: 'ካፌውን እየጠበቀ',
+  accepted: 'ተቀባይነት አግኝቷል',
+  preparing: 'እየተዘጋጀ',
+  ready: 'ዝግጁ',
+  'picked up': 'ተወስዷል',
+  delivered: 'ደርሷል',
+  cancelled: 'ተሰርዟል',
+  rejected: 'ውድቅ ተደርጓል',
+};
+
+const patterns = [
+  [/^(.+) is not taking orders right now$/, (m) => `${m[1]} አሁን ትዕዛዝ እየተቀበለ አይደለም`],
+  [/^(.+) is sold out$/, (m) => `${m[1]} አልቋል`],
+  [/^Invalid quantity for (.+)$/, (m) => `ለ${m[1]} ትክክለኛ ያልሆነ ብዛት`],
+  [/^Minimum order at (.+) is (.+)$/, (m) => `በ${m[1]} ዝቅተኛው ትዕዛዝ ${m[2]} ነው`],
+  [/^Minimum top-up is (.+)$/, (m) => `ዝቅተኛው የመሙያ መጠን ${m[1]} ነው`],
+  [/^(?:Order is|This order is already) (.+)$/, (m) => `የትዕዛዙ ሁኔታ: ${STATUS_AM[m[1]] || m[1]}`],
+  [/^Wrong code\. (\d+) attempts? left\.$/, (m) => `የተሳሳተ ኮድ። ${m[1]} ሙከራ ቀርቷል።`],
+  [/^You can carry at most (\d+) orders at once$/, (m) => `በአንድ ጊዜ ቢበዛ ${m[1]} ትዕዛዞችን መያዝ ይችላሉ`],
+  [/^You can have at most (\d+) active orders$/, (m) => `ቢበዛ ${m[1]} ንቁ ትዕዛዞች ሊኖሩዎት ይችላሉ`],
+  [/^Your account is suspended(?:: (.*))?$/, (m) => `መለያዎ ታግዷል${m[1] ? `: ${m[1]}` : ''}`],
+  [
+    /^Your wallet balance is too low for this order \(needs (.+), available (.+)\)\. Top up first\.$/,
+    (m) => `የዋሌት ቀሪ ሂሳብዎ ለዚህ ትዕዛዝ በቂ አይደለም (የሚያስፈልገው ${m[1]}፣ ያለው ${m[2]})። መጀመሪያ ዋሌትዎን ይሙሉ።`,
+  ],
+  [/^This payment is older than (\d+) hours$/, (m) => `ይህ ክፍያ ከ${m[1]} ሰዓት በላይ ቆይቷል`],
+  [/^Payment is not completed \(status: (.+)\)$/, (m) => `ክፍያው አልተጠናቀቀም (ሁኔታ: ${m[1]})`],
+  [/^Amount (.+) is below the minimum top-up of (.+)$/, (m) => `መጠኑ ${m[1]} ከዝቅተኛው የመሙያ መጠን ${m[2]} ያነሰ ነው`],
+  [/^Invalid (.+)$/, (m) => `ትክክለኛ ያልሆነ ${m[1]}`],
+];
+
+export function translateError(message, lang) {
+  if (lang !== 'am' || !message) return message;
+  if (exact[message]) return exact[message];
+  for (const [re, fn] of patterns) {
+    const m = message.match(re);
+    if (m) return fn(m);
+  }
+  return message;
+}
