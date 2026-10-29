@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { api } from '../../lib/api.js';
-import { useApi, useAction } from '../../lib/hooks.js';
-import { money } from '../../lib/format.js';
+import { useAction } from '../../lib/hooks.js';
 import { requestPhone } from '../../lib/telegram.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useT } from '../../i18n/index.js';
 import { Field } from '../../components/ui.jsx';
+import PlaceFields, { emptyPlace, fromSaved, isPlaceReady } from '../../components/PlaceFields.jsx';
 
 const USER_TYPES = ['student', 'teacher', 'staff', 'other'];
 
@@ -19,14 +19,12 @@ export default function ProfileForm({ submitLabel, onSaved, minimal = false }) {
   const { user, setUser } = useAuth();
   // Admins and cafe staff don't order to a dorm, so they only need name + phone
   const orders = !minimal && ['customer', 'driver'].includes(user.role);
-  const { data } = useApi(orders ? '/locations' : null);
+  const [place, setPlace] = useState(() => fromSaved(user.savedPlace, user.gender) || emptyPlace('dorm', user.gender || ''));
   const [form, setForm] = useState({
     fullName: user.fullName || [user.firstName, user.lastName].filter(Boolean).join(' '),
     phone: user.phone || '',
     userType: user.userType || '',
     studentId: user.studentId || '',
-    defaultLocation: user.defaultLocation?._id || user.defaultLocation || '',
-    defaultLocationDetails: user.defaultLocationDetails || '',
   });
   const [busy, run] = useAction();
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -45,6 +43,8 @@ export default function ProfileForm({ submitLabel, onSaved, minimal = false }) {
           ? { ...form }
           : { fullName: form.fullName, phone: form.phone };
       if (!body.userType) delete body.userType;
+      // Students: save their dorm only when it is filled in completely
+      if (orders && body.userType === 'student' && isPlaceReady(place)) body.savedPlace = place;
       const { data: res } = await api.patch('/users/me', body);
       setUser(res.user);
       onSaved?.(res.user);
@@ -79,19 +79,12 @@ export default function ProfileForm({ submitLabel, onSaved, minimal = false }) {
           <Field label={t('pf.studentId')}>
             <input className="input" value={form.studentId} onChange={set('studentId')} placeholder="UGR/1234/15" />
           </Field>
-          <Field label={t('pf.usualPlace')}>
-            <select className="input" value={form.defaultLocation} onChange={set('defaultLocation')}>
-              <option value="">{t('pf.choose')}</option>
-              {data?.locations?.map((l) => (
-                <option key={l._id} value={l._id}>
-                  {l.name} · {money(l.deliveryFee)}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label={t('pf.room')} hint={t('pf.roomHint')}>
-            <input className="input" value={form.defaultLocationDetails} onChange={set('defaultLocationDetails')} />
-          </Field>
+          {form.userType === 'student' && (
+            <>
+              <h4>{t('choose.dormTitle')}</h4>
+              <PlaceFields value={place} onChange={setPlace} />
+            </>
+          )}
         </>
       )}
       <button className="btn btn--block" disabled={busy}>

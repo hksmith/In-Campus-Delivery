@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../../lib/api.js';
 import { useApi, useAction } from '../../lib/hooks.js';
-import { dateTime, money, personName, timeAgo } from '../../lib/format.js';
+import { dateTime, money, personName, timeAgo, placeName } from '../../lib/format.js';
 import { useSocketEvent } from '../../lib/socket.js';
 import { callPhone, confirmDialog, promptDialog } from '../../lib/telegram.js';
 import { toast } from '../../lib/toast.js';
@@ -82,7 +82,7 @@ function AdminOrderCard({ order, onChanged, startOpen }) {
         <div style={{ textAlign: 'left' }}>
           <strong>#{order.orderNumber}</strong> · {order.cafe?.name}
           <div className="muted small">
-            {personName(order.customer)} → {order.delivery?.locationName} · {timeAgo(order.createdAt)}
+            {personName(order.customer)} → {placeName(order.delivery)} · {timeAgo(order.createdAt)}
           </div>
         </div>
         <div className="order-row__right">

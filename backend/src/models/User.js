@@ -24,6 +24,21 @@ const driverProfileSchema = new Schema(
   { _id: false }
 );
 
+/**
+ * A student's dorm, saved at sign-up: block + room (their gender = the dorm's gender).
+ * Teachers / staff don't save a place – they type it on each order.
+ */
+const savedPlaceSchema = new Schema(
+  {
+    kind: { type: String, enum: ['dorm', 'place'], required: true },
+    block: { type: String, trim: true, maxlength: 20 },
+    room: { type: String, trim: true, maxlength: 20 },
+    text: { type: String, trim: true, maxlength: 80 },
+    details: { type: String, trim: true, maxlength: 120 },
+  },
+  { _id: false }
+);
+
 const userSchema = new Schema(
   {
     // ── From Telegram ──
@@ -38,9 +53,10 @@ const userSchema = new Schema(
     fullName: { type: String, trim: true, maxlength: 80 },
     phone: { type: String, trim: true, maxlength: 20 },
     studentId: { type: String, trim: true, maxlength: 40 },
-    defaultLocation: { type: Schema.Types.ObjectId, ref: 'Location' },
-    defaultLocationDetails: { type: String, trim: true, maxlength: 120 }, // room / floor / landmark
-    gender: { type: String, enum: ['male', 'female'] }, // required for drivers (single-gender dorms)
+    savedPlace: { type: savedPlaceSchema, default: undefined }, // students: their dorm (block + room)
+    defaultLocation: { type: Schema.Types.ObjectId, ref: 'Location' }, // old – replaced by savedPlace
+    defaultLocationDetails: { type: String, trim: true, maxlength: 120 }, // old
+    gender: { type: String, enum: ['male', 'female'] }, // drivers + dorm deliveries (single-gender dorms)
     language: { type: String, enum: ['en', 'am'], default: 'en' },
     userType: { type: String, enum: USER_TYPES }, // student / teacher / staff / other
     /** What they picked on the "What do you want to do?" screen (order / deliver / cafe) */

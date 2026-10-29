@@ -27,6 +27,11 @@ export function CafeCard({ cafe }) {
             · {cafe.openingTime}–{cafe.closingTime}
           </span>
         </div>
+        {cafe.area && (
+          <div className="small muted">
+            📍 {cafe.area.name} · 🛵 {t('home.deliveryFrom', { fee: money(cafe.area.deliveryFee) })}
+          </div>
+        )}
       </div>
     </Link>
   );

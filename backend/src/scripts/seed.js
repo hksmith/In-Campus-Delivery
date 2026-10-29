@@ -1,6 +1,6 @@
 /**
  * Seeds starter data.
- *   npm run seed            → settings + sample campus locations (only if none exist)
+ *   npm run seed            → settings + delivery areas (Campus & around, Gubre)
  *   npm run seed -- --demo  → also creates demo users, a demo cafe and menu
  *                             (use with DEV_AUTH_BYPASS to test every role in a browser)
  *
@@ -11,16 +11,9 @@
 import mongoose from 'mongoose';
 import { assertEnv, env } from '../config/env.js';
 import { connectDB } from '../config/db.js';
-import { Cafe, Location, MenuItem, Settings, User } from '../models/index.js';
+import { Area, Cafe, MenuItem, Settings, User } from '../models/index.js';
+import { defaultArea, ensureDefaultAreas } from '../services/areas.js';
 
-const SAMPLE_LOCATIONS = [
-  { name: 'Male Dorm – Block A', type: 'dorm', deliveryFee: 15, sortOrder: 1, driverGender: 'male', description: 'Male drivers only' },
-  { name: 'Male Dorm – Block B', type: 'dorm', deliveryFee: 15, sortOrder: 2, driverGender: 'male', description: 'Male drivers only' },
-  { name: 'Female Dorm – Block C', type: 'dorm', deliveryFee: 15, sortOrder: 3, driverGender: 'female', description: 'Female drivers only' },
-  { name: 'Main Library', type: 'library', deliveryFee: 10, sortOrder: 4, description: 'Main entrance' },
-  { name: 'Engineering Building', type: 'academic', deliveryFee: 10, sortOrder: 5 },
-  { name: 'Main Gate', type: 'gate', deliveryFee: 10, sortOrder: 6 },
-];
 
 async function seedDemo() {
   const users = [
@@ -52,6 +45,12 @@ async function seedDemo() {
   for (const u of users) {
     if (!(await User.exists({ telegramId: u.telegramId }))) await User.create(u);
   }
+  // Demo student lives in Block 12, Room 305 (male dorm)
+  await User.updateOne(
+    { telegramId: 1000002, savedPlace: { $exists: false } },
+    { savedPlace: { kind: 'dorm', block: '12', room: '305' }, gender: 'male' }
+  );
+
   const owner = await User.findOne({ telegramId: 1000001 });
 
   let cafe = await Cafe.findOne({ owner: owner._id });
@@ -62,6 +61,7 @@ async function seedDemo() {
       description: 'Fresh breakfast, lunch and juice',
       phone: '0911000001',
       campusSpot: 'Behind the main library',
+      area: (await defaultArea())?._id,
       openingTime: '00:00',
       closingTime: '00:00', // same time = open 24h for testing
       status: 'approved',
@@ -86,12 +86,8 @@ async function main() {
   await Settings.getSettings();
   console.log('✅ Settings ready');
 
-  if ((await Location.countDocuments()) === 0) {
-    await Location.insertMany(SAMPLE_LOCATIONS);
-    console.log(`✅ Added ${SAMPLE_LOCATIONS.length} sample locations – edit them in Admin → Locations`);
-  } else {
-    console.log('ℹ️  Locations already exist, skipped');
-  }
+  await ensureDefaultAreas();
+  console.log(`✅ Delivery areas: ${(await Area.find().lean()).map((a) => `${a.name} (${a.deliveryFee})`).join(', ')}`);
 
   if (process.argv.includes('--demo')) {
     if (env.isProd) console.warn('⚠️  Seeding demo data in production!');

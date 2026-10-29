@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../lib/api.js';
-import { useAction } from '../../lib/hooks.js';
+import { useApi, useAction } from '../../lib/hooks.js';
+import { money } from '../../lib/format.js';
 import { useBackButton } from '../../lib/telegram.js';
 import { toast } from '../../lib/toast.js';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -21,12 +22,15 @@ export default function RegisterCafe() {
     description: '',
     phone: user.phone || '',
     campusSpot: '',
+    areaId: '',
     openingTime: '07:00',
     closingTime: '21:00',
     prepTimeMinutes: 15,
     logo: '',
   });
   const [busy, run] = useAction();
+  const { data: areaData } = useApi('/areas');
+  const areas = areaData?.areas || [];
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const submit = (e) => {
@@ -51,6 +55,29 @@ export default function RegisterCafe() {
         <Field label={t('reg.desc')}>
           <textarea className="input" rows={2} value={form.description} onChange={set('description')} />
         </Field>
+        <Field label={t('reg.area')} hint={t('reg.areaHint')}>
+          <div className="choice-list">
+            {areas.map((a) => (
+              <button
+                type="button"
+                key={a._id}
+                className={`choice ${form.areaId === a._id ? 'choice--active' : ''}`}
+                onClick={() => setForm((f) => ({ ...f, areaId: a._id }))}
+                aria-pressed={form.areaId === a._id}
+              >
+                <span className="choice__icon">📍</span>
+                <span className="choice__body">
+                  <strong>{a.name}</strong>
+                  <span className="muted small">
+                    {t('reg.areaFee', { fee: money(a.deliveryFee) })}
+                    {a.description ? ` · ${a.description}` : ''}
+                  </span>
+                </span>
+                <span className="choice__check">{form.areaId === a._id ? '✓' : ''}</span>
+              </button>
+            ))}
+          </div>
+        </Field>
         <Field label={t('reg.where')} hint={t('reg.whereHint')}>
           <input className="input" value={form.campusSpot} onChange={set('campusSpot')} placeholder={t('reg.wherePh')} />
         </Field>
@@ -69,7 +96,7 @@ export default function RegisterCafe() {
           <input className="input" type="number" min={1} max={180} value={form.prepTimeMinutes} onChange={set('prepTimeMinutes')} />
         </Field>
         <ImageUpload label={t('reg.logo')} value={form.logo} onChange={(logo) => setForm((f) => ({ ...f, logo }))} />
-        <button className="btn btn--block" disabled={busy}>
+        <button className="btn btn--block" disabled={busy || !form.areaId}>
           {busy ? t('common.sending') : t('reg.submit')}
         </button>
       </form>

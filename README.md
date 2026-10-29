@@ -19,7 +19,7 @@ campus-delivery/
 | **Cafe owner** | Accept/decline orders, manage menu & sold-out items, staff, stats, reviews |
 | **Cafe staff** | Accept orders and toggle sold-out items (no prices, stats or staff) |
 | **Driver** (students or staff) | Prepaid wallet, go online, take orders, pay the cafe at pickup, confirm delivery with code, earnings |
-| **Admin** | Approve cafes/drivers, all orders, reassign/cancel, locations & fees, commission, driver wallets & top-ups, broadcast |
+| **Admin** | Approve cafes/drivers, all orders, reassign/cancel, areas & delivery fees, delivery places, commission, driver wallets & top-ups, broadcast |
 
 Everyone can also order food. Drivers, cafe staff and admins switch with the **🍔 Order food / 💼 Dashboard** button.
 
@@ -60,7 +60,7 @@ Student places order ─► pending ──(cafe accepts within 5 min, else auto-
 |---|---|---|
 | Commission from cafes (on the food price) | 10% | Platform settings; a special rate per cafe in People → Cafes → Commission |
 | Platform cut of the delivery fee (driver keeps the rest) | 20% | Platform settings |
-| Delivery fee itself | per place | Delivery locations |
+| Delivery fee itself | price of the **cafe's area** (Campus & around 15, Gubre 30 to start) | Areas & delivery fees |
 
 Changes apply to new orders only; each order stores its own split. The settings screen shows a live birr example.
 Example with the defaults:
@@ -116,8 +116,20 @@ deliveries complete only with the student's 4-digit code; every wallet change is
 
 ### Single-gender dorms
 
-Each location has **Who can deliver here**: *Any driver*, *Female drivers only* or *Male drivers only*
-(Admin → More → Delivery locations). Female dorms get female drivers, male dorms get male drivers: other drivers don't
+### Areas, delivery fees & delivery places
+
+- **Areas** (Admin → More → **Areas & delivery fees**) each have ONE delivery fee. The app creates
+  *Campus & around* (15) and *Gubre* (30) on first start; change the prices or add more areas.
+- **Only cafes have an area.** A cafe picks it when registering (the admin can move it in People → Cafes).
+  **Delivery fee of an order = the price of the cafe's area.**
+- **Students** save their dorm at sign-up: **block number + dorm (room) number + male/female dorm**.
+- **Teachers, staff, others** save nothing – they write the delivery place on each order.
+- **At checkout:** students get **🏠 My dorm** (one tap) or **📍 Another place**, which asks
+  **Another dorm** (block, room, male/female) or **Other place** (a text box: *Library 2nd floor*, *Admin office 14*…).
+  Teachers/staff go straight to Dorm / Other place and type it.
+
+**Dorm deliveries only go to a driver of the same gender as the dorm** (the customer says *male* or *female dorm*).
+Female dorms get female drivers, male dorms get male drivers: other drivers don't
 see those orders, can't take them, can't be assigned them, and don't get the bot alert. Drivers choose their gender
 when applying; the admin can correct it in People → Drivers.
 
@@ -139,11 +151,10 @@ Have a native speaker review the Amharic before launch.
 | 3 | **MongoDB database** | [MongoDB Atlas](https://www.mongodb.com/atlas) free cluster → Connect → Drivers | `backend/.env` `MONGODB_URI` |
 | 4 | **Cloudinary** (images, optional) | [cloudinary.com](https://cloudinary.com) free account → Dashboard | `backend/.env` `CLOUDINARY_*` |
 | 5 | University name, app name | – | `backend/.env` `UNIVERSITY_NAME`, `APP_NAME` |
-| 6 | List of dorms/buildings + delivery fee for each | – | Add in the app: Admin → More → Delivery locations |
+| 6 | Delivery fee for each area (Campus & around, Gubre…) | – | Admin → More → Areas & delivery fees |
 | 7 | Cafe commission and platform cut of the delivery fee (percent or fixed birr) | – | Admin → More → Platform settings |
 | 8 | Your Telebirr number + name and/or CBE account + name (where drivers send top-ups) | Exactly as shown on receipts | `backend/.env` `TELEBIRR_RECEIVER_*`, `CBE_RECEIVER_*` |
 | 8b | Where the backend runs: in Ethiopia, or abroad + relay / Verify.ET | See "Automatic top-up verification" | `backend/.env` `VERIFY_RELAY_*` or `VERIFYET_*` |
-| 9 | Which dorms are female-only and which are male-only | – | Admin → More → Delivery locations |
 
 In Atlas → Network Access, allow `0.0.0.0/0` (or your server's IP) so the backend can connect.
 
@@ -158,7 +169,7 @@ Requirements: **Node.js 20+**.
 cd backend
 cp .env.example .env           # then fill in MONGODB_URI, TELEGRAM_BOT_TOKEN, ADMIN_TELEGRAM_IDS
 npm install
-npm run seed                   # creates settings + sample locations
+npm run seed                   # creates settings, areas + sample delivery places
 npm run dev                    # http://localhost:5000
 
 # Frontend (new terminal)
@@ -227,7 +238,7 @@ Set `frontend/.env` `VITE_API_URL=https://yyy…` and `backend/.env` `MINI_APP_U
 
 ### First things to do as admin
 
-1. More → **Delivery locations**: replace the sample dorms/buildings with your real ones and fees.
+1. More → **Areas & delivery fees**: set the price for Campus & around and Gubre (add more areas if needed).
 2. More → **Platform settings**: cafe commission and delivery-fee cut (percent or fixed birr each), minimum top-up and low-balance alert.
 3. Ask cafe owners to open the bot → Profile → **Register your cafe**, then approve them in People → Cafes.
 4. Ask students who want to deliver → Profile → **Become a driver**, approve them in People → Drivers.
@@ -241,11 +252,11 @@ All routes are under `/api` and require Telegram auth (`Authorization: tma <init
 | Area | Routes |
 |---|---|
 | Me | `GET /auth/me`, `PATCH /users/me`, `POST /users/me/driver-application`, `GET /users/me/cafe-application` |
-| Shop | `GET /locations`, `GET /cafes`, `GET /cafes/search?q=`, `GET /cafes/:id`, `GET /cafes/:id/reviews`, `POST /cafes/apply` |
+| Shop | `GET /areas`, `GET /cafes`, `GET /cafes/search?q=`, `GET /cafes/:id`, `GET /cafes/:id/reviews`, `POST /cafes/apply` |
 | Orders | `POST /orders`, `GET /orders?scope=active\|past`, `GET /orders/:id`, `POST /orders/:id/cancel`, `POST /orders/:id/review` |
 | Cafe | `/my-cafe` – profile, `accepting`, `menu` CRUD + `availability`, `orders` + `accept/reject/preparing/ready/cancel/report-unpaid`, `staff`, `stats`, `reviews` |
 | Driver | `/driver` – `status`, `available`, `active`, `history`, `earnings`, `wallet`, `wallet/topups`, `orders/:id/claim\|release\|pickup\|deliver` |
-| Admin | `/admin` – `stats`, `orders` (+ `cancel`, `assign`, `release-driver`, `force-deliver`, `resolve-issue`), `cafes`, `drivers`, `users`, `locations`, `settings`, `topups` (+ `approve`/`reject`/`recheck`), `wallets` (+ `adjust`), `broadcast` |
+| Admin | `/admin` – `stats`, `orders` (+ `cancel`, `assign`, `release-driver`, `force-deliver`, `resolve-issue`), `cafes` (+ `area`, `commission`), `drivers`, `users`, `areas`, `settings`, `topups` (+ `approve`/`reject`/`recheck`), `wallets` (+ `adjust`), `broadcast` |
 | Upload | `POST /uploads/image` (multipart `image`, max 5 MB) |
 
 Socket.io events (client listens): `order:new`, `order:updated`, `pool:new`, `pool:changed`, `me:updated`, `admin:applications`, `admin:topups`.
@@ -257,9 +268,9 @@ backend/src
 ├── server.js            starts DB, HTTP, Socket.io, bot, jobs
 ├── app.js               Express app, security, rate limit, routes
 ├── config/              env.js (all settings), db.js, constants.js
-├── models/              User, Cafe, MenuItem, Order, Location, Review, Settings, Counter, WalletTransaction
+├── models/              User, Cafe, MenuItem, Order, Area, Location, Review, Settings, Counter, WalletTransaction
 ├── middleware/          auth (Telegram initData), errors, sanitize
-├── controllers/         auth, user, cafe, order, myCafe, driver, admin, location
+├── controllers/         auth, user, cafe, order, myCafe, driver, admin, area
 ├── routes/index.js      every endpoint and who can use it
 ├── services/            orderService, walletService, telegram, realtime, upload, userService
 │   └── payments/        Telebirr + CBE receipt fetch/parse, Verify.ET, fraud checks

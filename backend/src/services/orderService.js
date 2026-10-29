@@ -88,7 +88,11 @@ async function sendTelegramForEvent(order, event, { note, previousDriverId } = {
   const v = {
     n: `#${order.orderNumber}`,
     cafe: escapeHtml(order.cafe?.name),
-    place: escapeHtml([order.delivery?.locationName, order.delivery?.details].filter(Boolean).join(', ')),
+    place: escapeHtml(
+      [order.delivery?.locationName, order.delivery?.details, order.delivery?.location ? null : order.delivery?.areaName]
+        .filter(Boolean)
+        .join(', ')
+    ),
     driver: escapeHtml(order.driver?.fullName || order.driver?.firstName || ''),
     payout: money(order.cafePayout),
   };

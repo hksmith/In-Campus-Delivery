@@ -1,4 +1,5 @@
-import { Cafe, Location } from '../models/index.js';
+import { Cafe } from '../models/index.js';
+import { parsePlace } from '../services/places.js';
 import { USER_TYPES, START_CHOICES } from '../models/User.js';
 import { ApiError } from '../utils/ApiError.js';
 import { pick } from '../utils/helpers.js';
@@ -8,17 +9,16 @@ import { emitTo, rooms } from '../services/realtime.js';
 
 const PHONE_RE = /^\+?[0-9 ()-]{7,20}$/;
 
-/** PATCH /api/users/me – update own profile */
+/** Saves a student's dorm (block + room); the dorm's gender is the student's gender */
+function applyDorm(user, input) {
+  const p = parsePlace({ ...input, kind: 'dorm' });
+  user.savedPlace = { kind: 'dorm', block: p.block, room: p.room, details: p.details };
+  user.gender = p.gender;
+}
+
+/** PATCH /api/users/me – update own profile (students: savedPlace = their dorm) */
 export async function updateMe(req, res) {
-  const data = pick(req.body, [
-    'fullName',
-    'phone',
-    'studentId',
-    'defaultLocation',
-    'defaultLocationDetails',
-    'language',
-    'userType',
-  ]);
+  const data = pick(req.body, ['fullName', 'phone', 'studentId', 'language', 'userType']);
   if (data.language !== undefined && !['en', 'am'].includes(data.language)) delete data.language;
   if (data.userType !== undefined && !USER_TYPES.includes(data.userType)) delete data.userType;
 
@@ -28,30 +28,33 @@ export async function updateMe(req, res) {
   if (data.phone !== undefined && !PHONE_RE.test(String(data.phone).trim())) {
     throw ApiError.badRequest('Please enter a valid phone number');
   }
-  if (data.defaultLocation) {
-    const loc = await Location.findOne({ _id: data.defaultLocation, isActive: true });
-    if (!loc) throw ApiError.badRequest('Unknown delivery location');
-  } else if (data.defaultLocation === '' || data.defaultLocation === null) {
-    data.defaultLocation = undefined;
-  }
 
   Object.assign(req.user, data);
+  if (req.body.savedPlace) applyDorm(req.user, req.body.savedPlace);
   await req.user.save();
-  await req.user.populate('defaultLocation', 'name deliveryFee isActive');
   res.json({ user: req.user.toJSON() });
 }
 
 /**
  * POST /api/users/me/start – the "What do you want to do?" screen after entering details.
- * Body: { userType: student|teacher|staff|other, choice: order|deliver|cafe }
- * Ordering needs nothing else; deliver / cafe continue to their application form.
+ * Body: { userType: student|teacher|staff|other, choice: order|deliver|cafe, savedPlace }
+ *   Students who order also send their dorm: savedPlace = { block, room, gender }.
+ *   Teachers / staff / others type the delivery place on each order instead.
+ * Deliver / cafe continue to their application form.
  */
 export async function chooseStart(req, res) {
   const user = req.user;
   if (!user.isProfileComplete) throw ApiError.badRequest('Please complete your profile first');
-  const { userType, choice } = req.body || {};
+  const { userType, choice, savedPlace } = req.body || {};
   if (!USER_TYPES.includes(userType)) throw ApiError.badRequest('Please choose who you are');
   if (!START_CHOICES.includes(choice)) throw ApiError.badRequest('Please choose what you want to do');
+
+  if (userType === 'student' && choice === 'order') {
+    if (!savedPlace) throw ApiError.badRequest('Enter your dorm or usual delivery place');
+    applyDorm(user, savedPlace);
+  } else if (userType === 'student' && savedPlace) {
+    applyDorm(user, savedPlace);
+  }
 
   user.userType = userType;
   user.startChoice = choice;

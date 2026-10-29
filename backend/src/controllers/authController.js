@@ -5,7 +5,6 @@ import { uploadsEnabled } from '../services/uploadService.js';
 /** GET /api/auth/me – who am I + app config. The frontend calls this on start. */
 export async function me(req, res) {
   const user = req.user;
-  await user.populate('defaultLocation', 'name deliveryFee isActive');
 
   let cafe = null;
   if (user.cafe) {

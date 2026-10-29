@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../../lib/api.js';
 import { useApi, useAction } from '../../lib/hooks.js';
@@ -9,25 +9,26 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { useCart } from '../../context/CartContext.jsx';
 import { useT } from '../../i18n/index.js';
 import { Empty, Field } from '../../components/ui.jsx';
+import PlaceFields, { KindSwitch, dormLabel, emptyPlace, isPlaceReady } from '../../components/PlaceFields.jsx';
 
 export default function Cart() {
   const t = useT();
-  const { user, settings } = useAuth();
+  const { user, settings, refresh } = useAuth();
   const cart = useCart();
   const navigate = useNavigate();
-  const { data: locData } = useApi('/locations');
-  const locations = locData?.locations || [];
+  // Delivery fee = the price of the cafe's area (Campus & around, Gubre…)
+  const { data: cafeData } = useApi(cart.cafe ? `/cafes/${cart.cafe._id}` : null);
+  const cafeArea = cafeData?.cafe?.area || null;
 
-  const [locationId, setLocationId] = useState(user.defaultLocation?._id || user.defaultLocation || '');
-  const [details, setDetails] = useState(user.defaultLocationDetails || '');
+  const isStudent = user.userType === 'student' || (!user.userType && user.savedPlace?.kind === 'dorm');
+  const saved = user.savedPlace?.kind === 'dorm' ? user.savedPlace : null;
+
+  // 'saved' = my dorm, 'other' = another dorm or another place (teachers/staff always type the place)
+  const [mode, setMode] = useState(saved ? 'saved' : 'other');
+  const [other, setOther] = useState(() => emptyPlace(isStudent ? 'dorm' : 'place', user.gender || ''));
   const [note, setNote] = useState('');
-  const [saveDefault, setSaveDefault] = useState(!user.defaultLocation);
+  const [saveDefault, setSaveDefault] = useState(isStudent && !saved);
   const [busy, run] = useAction();
-
-  // If the saved default location was removed, clear it
-  useEffect(() => {
-    if (locations.length && locationId && !locations.some((l) => l._id === locationId)) setLocationId('');
-  }, [locations, locationId]);
 
   if (!cart.count) {
     return (
@@ -46,16 +47,20 @@ export default function Cart() {
     );
   }
 
-  const location = locations.find((l) => l._id === locationId);
-  const deliveryFee = location?.deliveryFee || 0;
+  const ready = mode === 'saved' ? Boolean(saved) : isPlaceReady(other);
+  const deliveryFee = Number(cafeArea?.deliveryFee) || 0;
   const total = cart.subtotal + deliveryFee;
 
   const placeOrder = () =>
     run(async () => {
-      if (!locationId) {
+      if (!ready) {
         toast.error(t('cart.chooseWhere'));
         return;
       }
+      const where =
+        mode === 'saved'
+          ? { useSaved: true }
+          : { place: other, saveAsDefault: isStudent && other.kind === 'dorm' && saveDefault };
       const { data } = await api.post('/orders', {
         cafeId: cart.cafe._id,
         items: cart.lines.map((l) => ({
@@ -64,12 +69,11 @@ export default function Cart() {
           options: l.options.map((o) => o.name),
           note: l.note,
         })),
-        locationId,
-        locationDetails: details,
+        ...where,
         note,
-        saveAsDefault: saveDefault,
       });
       haptic.success();
+      if (where.saveAsDefault) refresh();
       cart.clear();
       navigate(`/orders/${data.order._id}`, { replace: true });
     });
@@ -105,27 +109,58 @@ export default function Cart() {
 
       <div className="card stack">
         <h3>{t('cart.deliverTo')}</h3>
-        <Field label={t('cart.place')}>
-          <select className="input" value={locationId} onChange={(e) => setLocationId(e.target.value)}>
-            <option value="">{t('cart.placePh')}</option>
-            {locations.map((l) => (
-              <option key={l._id} value={l._id}>
-                {l.name} · {money(l.deliveryFee)}
-              </option>
-            ))}
-          </select>
-        </Field>
-        {['female', 'male'].includes(location?.driverGender) && (
-          <p className="small">{t(location.driverGender === 'female' ? 'cart.femaleOnlyNote' : 'cart.maleOnlyNote')}</p>
+        {saved && (
+          <div className="choice-list">
+            <button
+              type="button"
+              className={`choice ${mode === 'saved' ? 'choice--active' : ''}`}
+              onClick={() => setMode('saved')}
+              aria-pressed={mode === 'saved'}
+            >
+              <span className="choice__icon">🏠</span>
+              <span className="choice__body">
+                <strong>{t('cart.myDorm')}</strong>
+                <span className="muted small">{dormLabel(t, saved)}</span>
+              </span>
+              <span className="choice__check">{mode === 'saved' ? '✓' : ''}</span>
+            </button>
+            <button
+              type="button"
+              className={`choice ${mode === 'other' ? 'choice--active' : ''}`}
+              onClick={() => setMode('other')}
+              aria-pressed={mode === 'other'}
+            >
+              <span className="choice__icon">📍</span>
+              <span className="choice__body">
+                <strong>{t('cart.otherPlace')}</strong>
+                <span className="muted small">{t('cart.otherPlaceSub')}</span>
+              </span>
+              <span className="choice__check">{mode === 'other' ? '✓' : ''}</span>
+            </button>
+          </div>
         )}
-        {location?.description && <p className="muted small">ℹ️ {location.description}</p>}
-        <Field label={t('pf.room')}>
-          <input className="input" value={details} onChange={(e) => setDetails(e.target.value)} placeholder={t('pf.roomHint')} />
-        </Field>
-        <label className="check">
-          <input type="checkbox" checked={saveDefault} onChange={(e) => setSaveDefault(e.target.checked)} />
-          <span>{t('cart.saveUsual')}</span>
-        </label>
+
+        {mode === 'other' && (
+          <>
+            <KindSwitch
+              value={other.kind}
+              onChange={(kind) => setOther((p) => ({ ...p, kind }))}
+              dormLabel={t('cart.anotherDorm')}
+              placeLabel={t('cart.anotherPlace')}
+            />
+            <PlaceFields value={other} onChange={setOther} />
+            {isStudent && other.kind === 'dorm' && (
+              <label className="check">
+                <input type="checkbox" checked={saveDefault} onChange={(e) => setSaveDefault(e.target.checked)} />
+                <span>{saved ? t('cart.saveUsual') : t('cart.saveFirst')}</span>
+              </label>
+            )}
+          </>
+        )}
+
+        {ready && (mode === 'saved' ? saved.kind === 'dorm' : other.kind === 'dorm') && (
+          <p className="small muted">{t('cart.dormDriverNote')}</p>
+        )}
         <Field label={t('cart.noteCafe')}>
           <input className="input" value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} />
         </Field>
@@ -139,7 +174,7 @@ export default function Cart() {
         </div>
         <div className="sum-row">
           <span>{t('cart.delivery')}</span>
-          <span>{location ? money(deliveryFee) : '—'}</span>
+          <span>{cafeArea ? money(deliveryFee) : '—'}</span>
         </div>
         <div className="sum-row sum-row--total">
           <span>{t('cart.total')}</span>
@@ -150,7 +185,7 @@ export default function Cart() {
 
       <button
         className="btn btn--block btn--lg"
-        disabled={busy || !locationId || (settings && !settings.isPlatformOpen)}
+        disabled={busy || !ready || (settings && !settings.isPlatformOpen)}
         onClick={placeOrder}
       >
         {busy ? t('cart.placing') : t('cart.place_order', { amount: money(total) })}

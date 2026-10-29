@@ -1,5 +1,7 @@
 import crypto from 'node:crypto';
-import { Cafe, Location, MenuItem, Order, Review, Settings, User, nextSequence } from '../models/index.js';
+import { Cafe, MenuItem, Order, Review, Settings, User, nextSequence } from '../models/index.js';
+import { resolveArea } from '../services/areas.js';
+import { parsePlace, placeLabel } from '../services/places.js';
 import { ACTIVE_STATUSES } from '../config/constants.js';
 import { env } from '../config/env.js';
 import { ApiError } from '../utils/ApiError.js';
@@ -10,17 +12,20 @@ import { applyStatus, newAverage, populateOrder, publishOrderEvent, viewFor } fr
 /**
  * POST /api/orders – place an order (customer)
  * body: { cafeId, items: [{ menuItemId, quantity, options: [optionName], note }],
- *         locationId, locationDetails, note, saveAsDefault }
+ *         useSaved: true            → deliver to my dorm (students save it at sign-up)
+ *      or place: { kind: 'dorm', block, room, gender }   → another dorm
+ *      or place: { kind: 'place', text, details }         → anywhere else (typed)
+ *         details, note, saveAsDefault }
+ * Delivery fee = the delivery fee of the CAFE's area (Campus & around, Gubre…).
  */
 export async function createOrder(req, res) {
   const user = req.user;
-  const { cafeId, items, locationId, locationDetails, note, saveAsDefault } = req.body;
+  const { cafeId, items, useSaved, place: placeInput, details, note, saveAsDefault } = req.body;
 
   const settings = await Settings.getSettings();
   if (!settings.isPlatformOpen) throw ApiError.badRequest(settings.closedMessage);
 
   assertObjectId(cafeId, 'cafe');
-  assertObjectId(locationId, 'delivery location');
   if (!Array.isArray(items) || items.length === 0) throw ApiError.badRequest('Your cart is empty');
   if (items.length > 30) throw ApiError.badRequest('Too many items in one order');
 
@@ -28,8 +33,19 @@ export async function createOrder(req, res) {
   if (!cafe || cafe.status !== 'approved') throw ApiError.notFound('Cafe not found');
   if (!cafe.isOpen) throw ApiError.badRequest(`${cafe.name} is not taking orders right now`);
 
-  const location = await Location.findOne({ _id: locationId, isActive: true });
-  if (!location) throw ApiError.badRequest('Please choose a valid delivery location');
+  // Where to deliver: my saved dorm, or another dorm / place typed at checkout
+  let place;
+  if (useSaved) {
+    const sp = user.savedPlace;
+    if (!sp?.kind) throw ApiError.badRequest('Enter your dorm or usual delivery place');
+    place = parsePlace({ ...sp.toObject?.() ?? sp, gender: user.gender, details: details ?? sp.details });
+  } else {
+    place = parsePlace({ ...placeInput, details: details ?? placeInput?.details });
+  }
+
+  // The delivery fee comes from the cafe's area
+  const cafeArea = await resolveArea(cafe.area);
+  if (!cafeArea) throw ApiError.badRequest('Delivery areas are not set up yet – please tell the admin');
 
   const activeCount = await Order.countDocuments({ customer: user._id, status: { $in: ACTIVE_STATUSES } });
   if (activeCount >= env.MAX_ACTIVE_ORDERS_PER_CUSTOMER) {
@@ -67,7 +83,7 @@ export async function createOrder(req, res) {
   if (subtotal < cafe.minOrderAmount) {
     throw ApiError.badRequest(`Minimum order at ${cafe.name} is ${cafe.minOrderAmount} ${env.CURRENCY}`);
   }
-  const deliveryFee = round2(location.deliveryFee);
+  const deliveryFee = round2(cafeArea.deliveryFee);
   const money = priceOrder({ subtotal, deliveryFee, cafe, settings });
 
   const order = new Order({
@@ -83,12 +99,15 @@ export async function createOrder(req, res) {
     platformEarning: money.platformEarning,
     cafePayout: money.cafePayout,
     delivery: {
-      location: location._id,
-      locationName: location.name,
-      details: locationDetails ? String(locationDetails).slice(0, 120) : user.defaultLocationDetails,
+      kind: place.kind,
+      block: place.block,
+      room: place.room,
+      locationName: placeLabel(place),
+      details: place.details,
       phone: user.phone,
       recipientName: user.fullName,
-      driverGender: location.driverGender || 'any',
+      // Dorms are single-gender → only a driver of the same gender can deliver there
+      driverGender: place.kind === 'dorm' ? place.gender : 'any',
     },
     note: note ? String(note).slice(0, 200) : undefined,
     deliveryCode: String(crypto.randomInt(1000, 10000)),
@@ -96,10 +115,11 @@ export async function createOrder(req, res) {
   applyStatus(order, 'pending', { by: user._id });
   await order.save();
 
-  if (saveAsDefault) {
+  // Students can save another dorm as their dorm
+  if (saveAsDefault && !useSaved && place.kind === 'dorm') {
     await User.updateOne(
       { _id: user._id },
-      { defaultLocation: location._id, defaultLocationDetails: order.delivery.details }
+      { savedPlace: { kind: 'dorm', block: place.block, room: place.room }, gender: place.gender }
     );
   }
 

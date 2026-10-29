@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../../lib/api.js';
 import { useApi, useAction, useTicker } from '../../lib/hooks.js';
-import { money, timeAgo } from '../../lib/format.js';
+import { money, timeAgo, placeName } from '../../lib/format.js';
 import { useSocketEvent } from '../../lib/socket.js';
 import { haptic } from '../../lib/telegram.js';
 import { toast } from '../../lib/toast.js';
@@ -44,7 +44,7 @@ export function Route({ order }) {
       <div className="route__arrow">→</div>
       <div>
         <span className="muted small">{t('drv.deliverTo')}</span>
-        <strong>{order.delivery?.locationName}</strong>
+        <strong>{placeName(order.delivery)}</strong>
         {order.delivery?.details && <span className="muted small">{order.delivery.details}</span>}
         <GenderTag only={order.delivery?.driverGender} />
       </div>

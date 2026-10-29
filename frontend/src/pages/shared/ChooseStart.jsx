@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { useT } from '../../i18n/index.js';
 import LanguageSwitch from '../../components/LanguageSwitch.jsx';
 import { StepDots } from './Onboarding.jsx';
+import PlaceFields, { emptyPlace, fromSaved, isPlaceReady } from '../../components/PlaceFields.jsx';
 
 const USER_TYPES = [
   { id: 'student', icon: '🎓' },
@@ -31,11 +32,18 @@ export default function ChooseStart() {
   const navigate = useNavigate();
   const [userType, setUserType] = useState(user.userType || '');
   const [choice, setChoice] = useState('');
+  // Students save their dorm (block + room); teachers/staff type the place on each order
+  const [place, setPlace] = useState(() => fromSaved(user.savedPlace, user.gender) || emptyPlace('dorm', user.gender || ''));
   const [busy, run] = useAction();
+  const needsPlace = choice === 'order' && userType === 'student';
 
   const go = () =>
     run(async () => {
-      const { data } = await api.post('/users/me/start', { userType, choice });
+      const { data } = await api.post('/users/me/start', {
+        userType,
+        choice,
+        savedPlace: needsPlace ? place : undefined,
+      });
       const target = CHOICES.find((c) => c.id === choice)?.path || '/';
       navigate(target, { replace: true });
       setUser(data.user);
@@ -89,7 +97,18 @@ export default function ChooseStart() {
         {choice && choice !== 'order' && <p className="muted small">{t('choose.approvalNote')}</p>}
       </div>
 
-      <button className="btn btn--block" disabled={busy || !userType || !choice} onClick={go}>
+      {needsPlace && (
+        <div className="card stack">
+          <h3>{t('choose.dormTitle')}</h3>
+          <p className="muted small">{t('choose.dormHint')}</p>
+          <PlaceFields value={place} onChange={setPlace} />
+        </div>
+      )}
+      {choice === 'order' && userType && userType !== 'student' && (
+        <p className="muted small">{t('choose.placeEachTime')}</p>
+      )}
+
+      <button className="btn btn--block" disabled={busy || !userType || !choice || (needsPlace && !isPlaceReady(place))} onClick={go}>
         {busy ? t('common.saving') : t('choose.continue')}
       </button>
       <p className="muted small" style={{ textAlign: 'center' }}>

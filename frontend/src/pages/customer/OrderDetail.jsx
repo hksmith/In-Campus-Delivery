@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../lib/api.js';
 import { useApi, useAction, useTicker } from '../../lib/hooks.js';
 import { STATUS, TRACK_STEPS } from '../../lib/constants.js';
-import { dateTime, minutesUntil, money, personName, time } from '../../lib/format.js';
+import { dateTime, minutesUntil, money, personName, time, placeName } from '../../lib/format.js';
 import { useSocketEvent } from '../../lib/socket.js';
 import { callPhone, confirmDialog, openTelegramUser, useBackButton } from '../../lib/telegram.js';
 import { toast } from '../../lib/toast.js';
@@ -198,7 +198,7 @@ export default function OrderDetail() {
           </div>
 
           <div className="card small">
-            📍 {order.delivery?.locationName}
+            📍 {placeName(order.delivery)}
             {order.delivery?.details ? ` – ${order.delivery.details}` : ''}
             {order.note && <div className="muted">📝 {order.note}</div>}
           </div>

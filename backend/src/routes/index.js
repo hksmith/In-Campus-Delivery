@@ -7,7 +7,7 @@ import { uploadImage } from '../services/uploadService.js';
 
 import * as auth from '../controllers/authController.js';
 import * as users from '../controllers/userController.js';
-import * as locations from '../controllers/locationController.js';
+import * as areas from '../controllers/areaController.js';
 import * as cafes from '../controllers/cafeController.js';
 import * as orders from '../controllers/orderController.js';
 import * as myCafe from '../controllers/myCafeController.js';
@@ -42,7 +42,7 @@ router.post(
 );
 
 // ── Customer ──
-router.get('/locations', ah(locations.listActive));
+router.get('/areas', ah(areas.listActive));
 router.get('/cafes', ah(cafes.listCafes));
 router.get('/cafes/search', ah(cafes.search));
 router.post('/cafes/apply', ah(cafes.applyCafe));
@@ -115,15 +115,17 @@ adminRouter.post('/orders/:id/force-deliver', ah(admin.forceDeliver));
 adminRouter.get('/cafes', ah(admin.listCafes));
 adminRouter.patch('/cafes/:id/status', ah(admin.setCafeStatus));
 adminRouter.patch('/cafes/:id/commission', ah(admin.setCafeCommission));
+adminRouter.patch('/cafes/:id/area', ah(areas.setCafeArea));
 adminRouter.get('/drivers', ah(admin.listDrivers));
 adminRouter.patch('/drivers/:id/status', ah(admin.setDriverStatus));
 adminRouter.get('/users', ah(admin.listUsers));
 adminRouter.patch('/users/:id', ah(admin.updateUser));
 
-adminRouter.get('/locations', ah(locations.listAll));
-adminRouter.post('/locations', ah(locations.create));
-adminRouter.patch('/locations/:id', ah(locations.update));
-adminRouter.delete('/locations/:id', ah(locations.remove));
+
+adminRouter.get('/areas', ah(areas.listAll));
+adminRouter.post('/areas', ah(areas.create));
+adminRouter.patch('/areas/:id', ah(areas.update));
+adminRouter.delete('/areas/:id', ah(areas.remove));
 
 adminRouter.get('/settings', ah(admin.getSettings));
 adminRouter.patch('/settings', ah(admin.updateSettings));

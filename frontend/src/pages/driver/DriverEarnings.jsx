@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { api } from '../../lib/api.js';
 import { useApi, useAction } from '../../lib/hooks.js';
-import { dateTime, money } from '../../lib/format.js';
+import { dateTime, money, placeName } from '../../lib/format.js';
 import { PAYMENT_METHODS } from '../../lib/constants.js';
 import { useSocketEvent } from '../../lib/socket.js';
 import { toast } from '../../lib/toast.js';
@@ -263,7 +263,7 @@ export default function DriverEarnings() {
               <div>
                 <strong>#{o.orderNumber}</strong> · {o.cafe?.name}
                 <div className="muted small">
-                  {o.delivery?.locationName} · {dateTime(o.deliveredAt || o.updatedAt)}
+                  {placeName(o.delivery)} · {dateTime(o.deliveredAt || o.updatedAt)}
                 </div>
               </div>
               <div className="order-row__right">

@@ -6,11 +6,13 @@ import { initSocket } from './socket/index.js';
 import { startBot } from './bot/index.js';
 import { startJobs, stopJobs } from './jobs/orderJobs.js';
 import { Settings } from './models/index.js';
+import { ensureDefaultAreas } from './services/areas.js';
 
 async function main() {
   assertEnv();
   await connectDB();
   await Settings.getSettings(); // make sure the settings document exists
+  await ensureDefaultAreas(); // Campus & around + Gubre on first start
 
   const app = createApp();
   const server = http.createServer(app);

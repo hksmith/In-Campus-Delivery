@@ -33,6 +33,7 @@ export const ownerOnly = (req, res, next) => {
 export async function getMyCafe(req, res) {
   const settings = await Settings.getSettings();
   const { type, value } = commissionRuleFor(req.cafe, settings);
+  await req.cafe.populate('area', 'name deliveryFee');
   res.json({ cafe: req.cafe.toJSON(), commission: { type, value } });
 }
 

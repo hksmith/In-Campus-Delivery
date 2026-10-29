@@ -36,7 +36,7 @@ import AdminOrders from './pages/admin/AdminOrders.jsx';
 import AdminPeople from './pages/admin/AdminPeople.jsx';
 import AdminMoney from './pages/admin/AdminMoney.jsx';
 import AdminMore from './pages/admin/AdminMore.jsx';
-import AdminLocations from './pages/admin/AdminLocations.jsx';
+import AdminAreas from './pages/admin/AdminAreas.jsx';
 import AdminSettings from './pages/admin/AdminSettings.jsx';
 import AdminBroadcast from './pages/admin/AdminBroadcast.jsx';
 
@@ -108,7 +108,7 @@ export default function App() {
           <Route path="/admin/people" element={<RequireRole roles={['admin']}><AdminPeople /></RequireRole>} />
           <Route path="/admin/money" element={<RequireRole roles={['admin']}><AdminMoney /></RequireRole>} />
           <Route path="/admin/more" element={<RequireRole roles={['admin']}><AdminMore /></RequireRole>} />
-          <Route path="/admin/locations" element={<RequireRole roles={['admin']}><AdminLocations /></RequireRole>} />
+          <Route path="/admin/areas" element={<RequireRole roles={['admin']}><AdminAreas /></RequireRole>} />
           <Route path="/admin/settings" element={<RequireRole roles={['admin']}><AdminSettings /></RequireRole>} />
           <Route path="/admin/broadcast" element={<RequireRole roles={['admin']}><AdminBroadcast /></RequireRole>} />
 

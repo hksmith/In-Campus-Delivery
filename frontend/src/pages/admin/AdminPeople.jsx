@@ -98,7 +98,16 @@ function Cafes() {
   const { data, loading, error, reload } = useApi('/admin/cafes', { params: { status } });
   const [busy, run] = useAction();
   const [editing, setEditing] = useState(null);
+  const { data: areaData } = useApi('/admin/areas');
+  const areas = (areaData?.areas || []).filter((a) => a.isActive);
   useSocketEvent('admin:applications', () => reload());
+
+  const setArea = (cafe, areaId) =>
+    run(async () => {
+      await api.patch(`/admin/cafes/${cafe._id}/area`, { areaId });
+      toast.success(t('common.saved'));
+      reload();
+    });
 
   const setCafeStatus = async (cafe, next) => {
     let reason;
@@ -140,6 +149,22 @@ function Cafes() {
                 )}
               </div>
               <Contact user={c.owner} />
+              <div className="row row--between small">
+                <span>{t('ap.area')}</span>
+                <select
+                  className="input input--sm"
+                  value={c.area?._id || ''}
+                  disabled={busy}
+                  onChange={(e) => e.target.value && setArea(c, e.target.value)}
+                >
+                  {!c.area && <option value="">{t('ap.noArea')}</option>}
+                  {areas.map((a) => (
+                    <option key={a._id} value={a._id}>
+                      {a.name} · {money(a.deliveryFee)}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="row row--between small">
                 <span>
                   {t('ap.commission')}:{' '}

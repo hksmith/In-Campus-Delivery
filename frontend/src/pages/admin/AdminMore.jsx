@@ -6,8 +6,8 @@ export default function AdminMore() {
   return (
     <div className="page stack">
       <h2>{t('am.title')}</h2>
-      <Link to="/admin/locations" className="list-link">
-        {t('am.locations')} <span className="muted small">{t('am.locationsSub')}</span>
+      <Link to="/admin/areas" className="list-link">
+        {t('am.areas')} <span className="muted small">{t('am.areasSub')}</span>
       </Link>
       <Link to="/admin/settings" className="list-link">
         {t('am.settings')} <span className="muted small">{t('am.settingsSub')}</span>

@@ -417,6 +417,11 @@ code {
   font-size: 16px; /* prevents iOS zoom */
   outline: none;
 }
+.input--sm {
+  width: auto;
+  max-width: 60%;
+  padding: 6px 8px;
+}
 .input:focus {
   border-color: var(--accent);
 }

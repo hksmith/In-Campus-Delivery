@@ -101,7 +101,12 @@ export default function CafeMenu() {
                 <Rating value={cafe.rating} count={cafe.ratingCount} /> · {t('home.min', { n: cafe.prepTimeMinutes })} ·{' '}
                 {cafe.openingTime}–{cafe.closingTime}
               </div>
-              {cafe.campusSpot && <div className="muted small">📍 {cafe.campusSpot}</div>}
+              {(cafe.area || cafe.campusSpot) && (
+                <div className="muted small">
+                  📍 {[cafe.area?.name, cafe.campusSpot].filter(Boolean).join(' · ')}
+                  {cafe.area && <> · 🛵 {t('home.deliveryFrom', { fee: money(cafe.area.deliveryFee) })}</>}
+                </div>
+              )}
             </div>
           </div>
           {cafe.description && <p className="muted">{cafe.description}</p>}

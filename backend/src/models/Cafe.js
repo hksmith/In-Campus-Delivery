@@ -22,7 +22,9 @@ const cafeSchema = new Schema(
     description: { type: String, trim: true, maxlength: 400 },
     logo: String,
     phone: { type: String, trim: true, maxlength: 20 },
-    campusSpot: { type: String, trim: true, maxlength: 120 }, // where the cafe is on campus
+    campusSpot: { type: String, trim: true, maxlength: 120 }, // where exactly (e.g. "next to Block 5")
+    /** Delivery area the cafe is in (Campus & around, Gubre…) – sets the delivery fee */
+    area: { type: Schema.Types.ObjectId, ref: 'Area' },
 
     openingTime: { type: String, default: '07:00', match: TIME_RE },
     closingTime: { type: String, default: '21:00', match: TIME_RE },

@@ -181,7 +181,10 @@ export async function forceDeliver(req, res) {
 export async function listCafes(req, res) {
   const filter = {};
   if (req.query.status) filter.status = String(req.query.status);
-  const cafes = await Cafe.find(filter).sort({ createdAt: -1 }).populate('owner', 'fullName username phone telegramId');
+  const cafes = await Cafe.find(filter)
+    .sort({ createdAt: -1 })
+    .populate('owner', 'fullName username phone telegramId')
+    .populate('area', 'name deliveryFee');
   res.json({ cafes: cafes.map((c) => c.toJSON()) });
 }
 

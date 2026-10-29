@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { api } from '../../lib/api.js';
 import { useApi, useAction, useTicker } from '../../lib/hooks.js';
-import { money, personName, timeAgo, minutesUntil } from '../../lib/format.js';
+import { money, personName, timeAgo, minutesUntil, placeName } from '../../lib/format.js';
 import { useSocketEvent } from '../../lib/socket.js';
 import { callPhone, confirmDialog, haptic, promptDialog } from '../../lib/telegram.js';
 import { toast } from '../../lib/toast.js';
@@ -111,7 +111,7 @@ function CafeOrderCard({ order, onChanged }) {
       </div>
 
       <div className="muted small">
-        👤 {personName(order.customer)} · 📍 {order.delivery?.locationName}
+        👤 {personName(order.customer)} · 📍 {placeName(order.delivery)}
         {order.driver ? ` · 🛵 ${personName(order.driver)}` : ''}
       </div>
 

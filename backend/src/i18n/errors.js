@@ -4,6 +4,21 @@
  * is shown in English.
  */
 const exact = {
+  'Enter your dorm or usual delivery place': 'ዶርምዎን ወይም የተለመደ ማድረሻ ቦታዎን ያስገቡ',
+  'Choose where to deliver': 'የሚደርስበትን ቦታ ይምረጡ',
+  'Enter the block number': 'የብሎክ ቁጥሩን ያስገቡ',
+  'Enter the dorm (room) number': 'የዶርም (ክፍል) ቁጥሩን ያስገቡ',
+  'Is it a male or female dorm?': 'የወንዶች ነው ወይስ የሴቶች ዶርም?',
+  'Write where to deliver': 'የሚደርስበትን ቦታ ይጻፉ',
+  'Choose your dorm or usual delivery place': 'ዶርምዎን ወይም የተለመደ ማድረሻ ቦታዎን ይምረጡ',
+  'Choose where your cafe is (area)': 'ካፌዎ የት እንዳለ (አካባቢ) ይምረጡ',
+  'Choose the area of the delivery place': 'የማድረሻ ቦታው ያለበትን አካባቢ ይምረጡ',
+  'Delivery areas are not set up yet – please tell the admin': 'የማድረሻ አካባቢዎች ገና አልተዘጋጁም – እባክዎ ለአስተዳዳሪው ይንገሩ',
+  'Please choose an area': 'እባክዎ አካባቢ ይምረጡ',
+  'Enter the area name': 'የአካባቢውን ስም ያስገቡ',
+  'Enter a delivery fee of 0 or more': 'ከ0 ወይም ከዚያ በላይ የማድረሻ ክፍያ ያስገቡ',
+  'You need at least one active area': 'ቢያንስ አንድ የሚሰራ አካባቢ ያስፈልጋል',
+  'Area not found': 'አካባቢው አልተገኘም',
   'Please choose who you are': 'እባክዎ ማን እንደሆኑ ይምረጡ',
   'Please choose what you want to do': 'እባክዎ ምን ማድረግ እንደሚፈልጉ ይምረጡ',
   'Add a note explaining why':'ምክንያቱን የሚያስረዳ ማስታወሻ ያስገቡ',

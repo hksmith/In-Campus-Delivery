@@ -47,8 +47,13 @@ const orderSchema = new Schema(
     cafePayout: { type: Number, default: 0 },
 
     delivery: {
-      location: { type: Schema.Types.ObjectId, ref: 'Location' },
-      locationName: String,
+      kind: { type: String, enum: ['dorm', 'place'] }, // dorm = block + room, place = typed text
+      block: String,
+      room: String,
+      location: { type: Schema.Types.ObjectId, ref: 'Location' }, // only on old orders
+      locationName: String, // what the driver sees, e.g. "Block 12" or "Near the mosque"
+      area: { type: Schema.Types.ObjectId, ref: 'Area' },
+      areaName: String, // e.g. "Gubre"
       details: { type: String, maxlength: 120 }, // room / floor / landmark
       phone: String,
       recipientName: String,

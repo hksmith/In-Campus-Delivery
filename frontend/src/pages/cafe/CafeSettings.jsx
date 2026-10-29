@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../lib/api.js';
 import { useApi, useAction } from '../../lib/hooks.js';
-import { personName } from '../../lib/format.js';
+import { money, personName } from '../../lib/format.js';
 import { confirmDialog } from '../../lib/telegram.js';
 import { toast } from '../../lib/toast.js';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -48,6 +48,13 @@ function CafeProfileForm() {
           <h3>{t('set.details')}</h3>
           {data?.commission && (
             <div className="banner banner--info small">{t('set.yourCommission', { rule: ruleText(data.commission) })}</div>
+          )}
+          {data?.cafe && (
+            <div className="banner banner--info small">
+              {data.cafe.area?.name
+                ? t('set.yourArea', { area: data.cafe.area.name, fee: money(data.cafe.area.deliveryFee) })
+                : t('set.noArea')}
+            </div>
           )}
           <Field label={t('reg.name')}>
             <input className="input" value={form.name || ''} onChange={set('name')} required />

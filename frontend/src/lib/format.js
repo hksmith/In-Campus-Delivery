@@ -30,4 +30,8 @@ export const dateTime = (date) =>
 
 export const minutesUntil = (date) => (date ? Math.round((new Date(date).getTime() - Date.now()) / 60000) : null);
 
+/** Delivery place label: "Block A" or, for a typed place, "Near the mosque (Gubre)" */
+export const placeName = (d) =>
+  d ? (d.location || !d.areaName ? d.locationName || '—' : `${d.locationName} (${d.areaName})`) : '—';
+
 export const personName = (u) => u?.fullName || u?.firstName || (u?.username ? `@${u.username}` : '—');
