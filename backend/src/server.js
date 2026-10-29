@@ -5,6 +5,7 @@ import { createApp } from './app.js';
 import { initSocket } from './socket/index.js';
 import { startBot } from './bot/index.js';
 import { startJobs, stopJobs } from './jobs/orderJobs.js';
+import { startKeepAlive, stopKeepAlive } from './jobs/keepAlive.js';
 import { Settings } from './models/index.js';
 import { ensureDefaultAreas } from './services/areas.js';
 
@@ -19,6 +20,7 @@ async function main() {
   initSocket(server);
   const bot = await startBot();
   startJobs();
+  startKeepAlive(); // stops Render's free plan from sleeping
 
   server.listen(env.PORT, () => {
     console.log(`🚀 API listening on port ${env.PORT} (${env.NODE_ENV})`);
@@ -28,6 +30,7 @@ async function main() {
   const shutdown = async (signal) => {
     console.log(`\n${signal} received, shutting down…`);
     stopJobs();
+    stopKeepAlive();
     if (bot && !env.BOT_WEBHOOK_URL) await bot.stop().catch(() => {});
     server.close();
     await disconnectDB().catch(() => {});

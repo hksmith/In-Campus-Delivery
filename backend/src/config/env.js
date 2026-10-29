@@ -70,6 +70,9 @@ export const env = {
   VERIFYET_API_KEY: process.env.VERIFYET_API_KEY || '',
   VERIFYET_BASE_URL: (process.env.VERIFYET_BASE_URL || 'https://verify.et').replace(/\/$/, ''),
 
+  KEEP_ALIVE: process.env.KEEP_ALIVE !== 'false',
+  KEEP_ALIVE_URL: (process.env.KEEP_ALIVE_URL || '').trim(),
+
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || '',
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || '',

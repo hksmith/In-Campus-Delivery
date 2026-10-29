@@ -224,6 +224,12 @@ Set `frontend/.env` `VITE_API_URL=https://yyy…` and `backend/.env` `MINI_APP_U
 > Render's free plan sleeps after 15 min of no traffic, which delays the first request and live updates.
 > For real use pick a paid instance, Railway, or a small VPS (run with `pm2 start src/server.js`).
 
+**Keeping Render awake (free plan):** Render sleeps after 15 minutes without requests. The backend pings its own
+`/api/health` every 10 minutes (`KEEP_ALIVE=true`, on by default). For extra safety, also ping it from outside,
+e.g. a cron job on any always-on server:
+`*/10 * * * * curl -fsS -m 20 -o /dev/null https://YOUR-API.onrender.com/api/health`.
+One service running all month uses ~744 of Render's 750 free hours.
+
 ### Frontend → Vercel (or Netlify / Cloudflare Pages)
 
 1. New project → same repo → **Root directory:** `frontend`. Framework: Vite (build `npm run build`, output `dist`).

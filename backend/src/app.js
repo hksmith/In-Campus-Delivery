@@ -29,7 +29,8 @@ export function createApp() {
   app.use(cors({ origin: corsOrigin }));
   app.use(express.json({ limit: '1mb' }));
   app.use(sanitize);
-  app.use(morgan(env.isProd ? 'tiny' : 'dev'));
+  // Don't fill the log with keep-alive / uptime pings
+  app.use(morgan(env.isProd ? 'tiny' : 'dev', { skip: (req) => req.url === '/api/health' }));
 
   app.get('/', (req, res) => res.json({ name: `${env.APP_NAME} API`, status: 'ok' }));
   app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
