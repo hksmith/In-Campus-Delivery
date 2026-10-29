@@ -1,3 +1,4 @@
+import http from 'node:http';
 import https from 'node:https';
 import { env } from '../../config/env.js';
 
@@ -16,7 +17,9 @@ const ALLOWED_HOSTS = ['transactioninfo.ethiotelecom.et', 'apps.cbe.com.et'];
 
 function rawGet(url, { insecure = false, timeout = 20000, redirects = 3 } = {}) {
   return new Promise((resolve, reject) => {
-    const req = https.get(
+    // The relay on your own VPS may be plain http://; Telebirr/CBE are always https://
+    const client = url.startsWith('http://') ? http : https;
+    const req = client.get(
       url,
       {
         rejectUnauthorized: !insecure,

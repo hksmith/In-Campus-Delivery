@@ -1,0 +1,19 @@
+# systemd service – keeps the receipt relay running (and restarts it after a reboot).
+# Copy to /etc/systemd/system/receipt-relay.service, put your own key below, then:
+#   systemctl daemon-reload && systemctl enable --now receipt-relay
+[Unit]
+Description=Receipt relay for In-Campus Delivery (Telebirr / CBE)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Environment=RELAY_KEY=PUT_YOUR_SECRET_KEY_HERE
+Environment=RELAY_PORT=8088
+ExecStart=/usr/bin/python3 /opt/receipt-relay/receipt-relay.py
+Restart=always
+RestartSec=3
+DynamicUser=yes
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target
