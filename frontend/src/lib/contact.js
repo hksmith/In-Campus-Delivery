@@ -1,7 +1,6 @@
 /**
  * Tapping a phone number anywhere opens a small menu (rendered by <ContactHost />):
- *   📞 Call (phone app)   💬 Message on Telegram (if we know their username)   📋 Copy number
- * Telegram's in-app browser often ignores tel: links on desktop, so Copy is always there too.
+ *   💬 Message on Telegram (if we know their username)   📋 Copy number (then call from the phone app)
  */
 const listeners = new Set();
 

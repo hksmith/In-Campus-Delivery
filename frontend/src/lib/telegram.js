@@ -50,7 +50,7 @@ export function openTelegramUser(username) {
 }
 
 /**
- * Opens the contact menu for a phone number: Call / Message on Telegram / Copy.
+ * Opens the contact menu for a phone number: Message on Telegram / Copy number.
  * Pass { username, name } when known so "Message on Telegram" appears too.
  */
 export function callPhone(phone, { username, name } = {}) {

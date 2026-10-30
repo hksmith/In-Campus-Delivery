@@ -5,7 +5,7 @@ import { toast } from '../lib/toast.js';
 import { useT } from '../i18n/index.js';
 import { Sheet } from './ui.jsx';
 
-/** The "Call / Message on Telegram / Copy number" menu opened by callPhone() / <PhoneLink /> */
+/** The "Message on Telegram / Copy number" menu opened by callPhone() / <PhoneLink /> */
 export default function ContactHost() {
   const t = useT();
   const [who, setWho] = useState(null);
@@ -29,15 +29,9 @@ export default function ContactHost() {
     <Sheet open title={who.name || tel || `@${who.username}`} onClose={close}>
       <div className="stack">
         {tel && <div className="contact-number">{tel}</div>}
-        {tel && (
-          // A real link works best in Telegram's in-app browser (opens the phone app)
-          <a className="btn btn--block" href={`tel:${tel}`} onClick={() => setTimeout(close, 300)}>
-            📞 {t('contact.call')}
-          </a>
-        )}
         {who.username && (
           <button
-            className="btn btn--secondary btn--block"
+            className="btn btn--block"
             onClick={() => {
               openTelegramUser(who.username);
               close();

@@ -732,7 +732,6 @@ export default {
   'choose.placeEachTime': "You’ll write the delivery place each time you order.",
 
   // Contact menu
-  'contact.call': "Call (phone)",
   'contact.telegram': "Message @{username} on Telegram",
   'contact.copy': "Copy number",
   'contact.copied': "Number copied",

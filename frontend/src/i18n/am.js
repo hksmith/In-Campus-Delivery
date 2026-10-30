@@ -706,7 +706,6 @@ export default {
   'choose.placeEachTime': "በእያንዳንዱ ትዕዛዝ የሚደርስበትን ቦታ ይጽፋሉ።",
 
   // Contact menu
-  'contact.call': "ደውል (ስልክ)",
   'contact.telegram': "@{username}ን በቴሌግራም መልዕክት ላክ",
   'contact.copy': "ቁጥሩን ቅዳ",
   'contact.copied': "ቁጥሩ ተቀድቷል",

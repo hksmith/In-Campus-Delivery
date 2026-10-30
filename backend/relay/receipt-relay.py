@@ -9,6 +9,9 @@ It does the same job as receipt-relay.php:
   GET /?key=SECRET&url=https://transactioninfo.ethiotelecom.et/receipt/ABC1234567
 Only the two official receipt addresses are allowed, so it can't be used as an open proxy.
 
+Privacy: receipts only pass through memory – nothing is saved to disk, and the relay writes
+NO logs at all (no requests, no errors). The service file also sends any output to /dev/null.
+
 Settings come from environment variables (see receipt-relay.service):
   RELAY_KEY   the secret (same value as VERIFY_RELAY_KEY on Render) – REQUIRED
   RELAY_PORT  port to listen on (default 8088)
@@ -91,16 +94,17 @@ class Handler(BaseHTTPRequestHandler):
         self.send(status or 200, body, ctype)
 
     def log_message(self, fmt, *args):
-        # Never write the secret key to the log
-        sys.stderr.write("%s %s\n" % (self.address_string(), re.sub(r"key=[^&\s]*", "key=***", fmt % args)))
+        pass  # silent: no request or error logs, ever
 
 
 class Server(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
+    def handle_error(self, request, client_address):
+        pass  # silent: don't print errors (they could contain receipt links)
+
 
 if __name__ == "__main__":
     if len(RELAY_KEY) < 16:
-        sys.exit("Set RELAY_KEY to a random string of at least 16 characters")
-    print("Receipt relay listening on port %d" % PORT, flush=True)
+        sys.exit(1)  # RELAY_KEY must be at least 16 characters (exits silently)
     Server(("0.0.0.0", PORT), Handler).serve_forever()

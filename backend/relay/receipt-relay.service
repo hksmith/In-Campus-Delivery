@@ -8,9 +8,12 @@ Wants=network-online.target
 
 [Service]
 Environment=RELAY_KEY=PUT_YOUR_SECRET_KEY_HERE
-Environment=RELAY_PORT=8088
+Environment=RELAY_PORT=8091
 ExecStart=/usr/bin/python3 /opt/receipt-relay/receipt-relay.py
 Restart=always
+# Privacy: the relay never logs; also throw away any output so nothing reaches the system log
+StandardOutput=null
+StandardError=null
 RestartSec=3
 DynamicUser=yes
 NoNewPrivileges=yes
