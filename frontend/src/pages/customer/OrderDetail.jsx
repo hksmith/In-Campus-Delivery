@@ -160,7 +160,7 @@ export default function OrderDetail() {
               </div>
               <div className="row">
                 {order.driver.phone && (
-                  <button className="btn btn--secondary btn--sm" onClick={() => callPhone(order.driver.phone)}>
+                  <button className="btn btn--secondary btn--sm" onClick={() => callPhone(order.driver.phone, { username: order.driver.username, name: personName(order.driver) })}>
                     {t('common.call')}
                   </button>
                 )}
@@ -177,7 +177,7 @@ export default function OrderDetail() {
             <div className="row row--between">
               <strong>{order.cafe?.name}</strong>
               {order.cafe?.phone && (
-                <button className="link small" onClick={() => callPhone(order.cafe.phone)}>
+                <button className="link small" onClick={() => callPhone(order.cafe.phone, { name: order.cafe.name })}>
                   {t('od.callCafe')}
                 </button>
               )}

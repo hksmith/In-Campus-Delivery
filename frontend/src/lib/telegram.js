@@ -1,3 +1,4 @@
+import { openContact } from './contact.js';
 import { useEffect } from 'react';
 
 /** Telegram WebApp object (undefined when opened in a normal browser) */
@@ -48,9 +49,12 @@ export function openTelegramUser(username) {
   else window.open(url, '_blank');
 }
 
-export function callPhone(phone) {
-  if (!phone) return;
-  window.location.href = `tel:${phone.replace(/\s/g, '')}`;
+/**
+ * Opens the contact menu for a phone number: Call / Message on Telegram / Copy.
+ * Pass { username, name } when known so "Message on Telegram" appears too.
+ */
+export function callPhone(phone, { username, name } = {}) {
+  openContact({ phone, username, name });
 }
 
 /** Ask Telegram to share the user's phone number. Resolves to the number or null. */

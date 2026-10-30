@@ -155,7 +155,7 @@ function CafeOrderCard({ order, onChanged }) {
       {['accepted', 'preparing', 'ready'].includes(order.status) && (
         <div className="row">
           {order.driver?.phone && (
-            <button className="btn btn--ghost btn--sm" onClick={() => callPhone(order.driver.phone)}>
+            <button className="btn btn--ghost btn--sm" onClick={() => callPhone(order.driver.phone, { username: order.driver.username, name: personName(order.driver) })}>
               {t('co.driver')}
             </button>
           )}
@@ -175,7 +175,7 @@ function CafeOrderCard({ order, onChanged }) {
           ) : (
             <div className="row">
               {order.driver.phone && (
-                <button className="btn btn--ghost btn--sm" onClick={() => callPhone(order.driver.phone)}>
+                <button className="btn btn--ghost btn--sm" onClick={() => callPhone(order.driver.phone, { username: order.driver.username, name: personName(order.driver) })}>
                   {t('co.driver')}
                 </button>
               )}

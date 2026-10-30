@@ -1285,3 +1285,15 @@ textarea.input {
   border-radius: var(--radius-sm);
   background: var(--soft);
 }
+
+/* ── Contact menu (Call / Telegram / Copy) ── */
+.contact-number {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 0 8px;
+}
+a.btn {
+  text-decoration: none;
+}

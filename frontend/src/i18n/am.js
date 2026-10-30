@@ -704,4 +704,12 @@ export default {
   'cart.saveFirst': "እንደ ዶርሜ አስቀምጥ",
   'cart.dormDriverNote': "የዶርም ማድረሻ፦ የዶርሙ ጾታ የሆነ አድራሽ ያመጣልዎታል።",
   'choose.placeEachTime': "በእያንዳንዱ ትዕዛዝ የሚደርስበትን ቦታ ይጽፋሉ።",
+
+  // Contact menu
+  'contact.call': "ደውል (ስልክ)",
+  'contact.telegram': "@{username}ን በቴሌግራም መልዕክት ላክ",
+  'contact.copy': "ቁጥሩን ቅዳ",
+  'contact.copied': "ቁጥሩ ተቀድቷል",
+  'contact.copyFailed': "መቅዳት አልተቻለም – ቁጥሩ {phone} ነው",
+  'contact.telegramCallHint': "በቴሌግራም ለመደወል ውይይቱን ከፍተው ከላይ ያለውን 📞 ምልክት ይጫኑ።",
 };

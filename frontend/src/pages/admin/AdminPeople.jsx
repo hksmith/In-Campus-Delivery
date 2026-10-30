@@ -18,7 +18,7 @@ function Contact({ user }) {
   return (
     <div className="row row--wrap small">
       {user.phone && (
-        <button className="link" onClick={() => callPhone(user.phone)}>
+        <button className="link" onClick={() => callPhone(user.phone, { username: user.username, name: personName(user) })}>
           📞 {user.phone}
         </button>
       )}

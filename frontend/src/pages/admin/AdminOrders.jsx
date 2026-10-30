@@ -4,7 +4,8 @@ import { api } from '../../lib/api.js';
 import { useApi, useAction } from '../../lib/hooks.js';
 import { dateTime, money, personName, timeAgo, placeName } from '../../lib/format.js';
 import { useSocketEvent } from '../../lib/socket.js';
-import { callPhone, confirmDialog, promptDialog } from '../../lib/telegram.js';
+import { confirmDialog, promptDialog } from '../../lib/telegram.js';
+import { PhoneLink } from '../../components/ContactHost.jsx';
 import { toast } from '../../lib/toast.js';
 import { useT } from '../../i18n/index.js';
 import { Async, Empty, GenderTag, OrderItems, Sheet, StatusBadge, Tabs } from '../../components/ui.jsx';
@@ -102,19 +103,17 @@ function AdminOrderCard({ order, onChanged, startOpen }) {
           <div className="small muted stack stack--sm">
             <span>{t('ao.created', { date: dateTime(order.createdAt) })}</span>
             <span>
-              👤 {personName(order.customer)} {order.delivery?.phone}{' '}
-              {order.delivery?.phone && (
-                <button className="link" onClick={() => callPhone(order.delivery.phone)}>
-                  {t('common.call')}
-                </button>
-              )}
+              👤 {personName(order.customer)}{' '}
+              <PhoneLink
+                phone={order.delivery?.phone || order.customer?.phone}
+                username={order.customer?.username}
+                name={personName(order.customer)}
+              />
             </span>
             <span>
-              🛵 {order.driver ? `${personName(order.driver)} ${order.driver.phone || ''}` : t('ao.noDriver')}{' '}
-              {order.driver?.phone && (
-                <button className="link" onClick={() => callPhone(order.driver.phone)}>
-                  {t('common.call')}
-                </button>
+              🛵 {order.driver ? personName(order.driver) : t('ao.noDriver')}{' '}
+              {order.driver && (
+                <PhoneLink phone={order.driver.phone} username={order.driver.username} name={personName(order.driver)} />
               )}
             </span>
             <GenderTag only={order.delivery?.driverGender} className="" />

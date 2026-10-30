@@ -109,7 +109,7 @@ function TopUps({ status }) {
                     {t('aw.reject')}
                   </button>
                   {tx.driver?.phone && (
-                    <button className="btn btn--ghost btn--sm" onClick={() => callPhone(tx.driver.phone)}>
+                    <button className="btn btn--ghost btn--sm" onClick={() => callPhone(tx.driver.phone, { username: tx.driver.username, name: personName(tx.driver) })}>
                       {t('common.call')}
                     </button>
                   )}
@@ -189,7 +189,7 @@ function Balances() {
                       {t('aw.adjust')}
                     </button>
                     {d.phone && (
-                      <button className="btn btn--ghost btn--sm" onClick={() => callPhone(d.phone)}>
+                      <button className="btn btn--ghost btn--sm" onClick={() => callPhone(d.phone, { username: d.username, name: personName(d) })}>
                         {t('common.call')}
                       </button>
                     )}

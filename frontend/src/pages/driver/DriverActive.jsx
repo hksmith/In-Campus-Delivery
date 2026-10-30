@@ -64,7 +64,7 @@ function DeliveryCard({ order, onChanged }) {
 
       <div className="row row--wrap">
         {phone && (
-          <button className="btn btn--secondary btn--sm" onClick={() => callPhone(phone)}>
+          <button className="btn btn--secondary btn--sm" onClick={() => callPhone(phone, { username: customer?.username, name: personName(customer) })}>
             {t('da.student')}
           </button>
         )}
@@ -74,7 +74,7 @@ function DeliveryCard({ order, onChanged }) {
           </button>
         )}
         {order.cafe?.phone && (
-          <button className="btn btn--secondary btn--sm" onClick={() => callPhone(order.cafe.phone)}>
+          <button className="btn btn--secondary btn--sm" onClick={() => callPhone(order.cafe.phone, { name: order.cafe.name })}>
             {t('da.cafe')}
           </button>
         )}

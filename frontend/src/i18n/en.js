@@ -730,4 +730,12 @@ export default {
   'cart.saveFirst': "Save as my dorm",
   'cart.dormDriverNote': "Dorm delivery: a driver of the same gender as the dorm will bring it.",
   'choose.placeEachTime': "You’ll write the delivery place each time you order.",
+
+  // Contact menu
+  'contact.call': "Call (phone)",
+  'contact.telegram': "Message @{username} on Telegram",
+  'contact.copy': "Copy number",
+  'contact.copied': "Number copied",
+  'contact.copyFailed': "Could not copy – the number is {phone}",
+  'contact.telegramCallHint': "To call on Telegram, open the chat and tap the 📞 icon at the top.",
 };
