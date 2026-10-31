@@ -27,6 +27,7 @@ const NAVS = {
     { to: '/driver', label: 'nav.available', icon: '📦', end: true },
     { to: '/driver/active', label: 'nav.trips', icon: '🛵' },
     { to: '/driver/earnings', label: 'nav.wallet', icon: '💵' },
+    { to: '/driver/ratings', label: 'nav.ratings', icon: '⭐' },
     { to: '/profile', label: 'nav.profile', icon: '👤' },
   ],
   admin: [

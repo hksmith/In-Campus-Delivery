@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Cafe, Order, User, WalletTransaction } from '../models/index.js';
+import { Cafe, Order, Review, User, WalletTransaction } from '../models/index.js';
 import { POOL_STATUSES } from '../config/constants.js';
 import { env } from '../config/env.js';
 import { ApiError } from '../utils/ApiError.js';
@@ -42,16 +42,25 @@ export async function active(req, res) {
   res.json({ orders: orders.map((o) => viewFor(o, 'driver')) });
 }
 
-/** GET /api/driver/history */
+/** GET /api/driver/history?page=1&limit=20 – my finished deliveries (delivered + cancelled), newest first */
 export async function history(req, res) {
-  const { limit, skip } = parsePaging(req.query, 30);
+  const { page, limit, skip } = parsePaging(req.query, 20);
+  // Fetch one extra row to know whether another page exists
   const orders = await populateOrder(
     Order.find({ driver: req.user._id, status: { $in: ['delivered', 'cancelled'] } })
-      .sort({ updatedAt: -1 })
+      .sort({ updatedAt: -1, _id: -1 })
       .skip(skip)
-      .limit(limit)
+      .limit(limit + 1)
   );
-  res.json({ orders: orders.map((o) => viewFor(o, 'driver')) });
+  const hasMore = orders.length > limit;
+  const rows = orders.slice(0, limit).map((o) => {
+    const v = viewFor(o, 'driver');
+    // The job is over – the driver no longer needs the student's phone number
+    if (v.delivery) delete v.delivery.phone;
+    if (v.customer) delete v.customer.phone;
+    return v;
+  });
+  res.json({ orders: rows, page, hasMore });
 }
 
 async function earningsSince(driverId, since) {
@@ -82,6 +91,49 @@ export async function earnings(req, res) {
     rating: req.user.driverProfile.rating,
     ratingCount: req.user.driverProfile.ratingCount,
   });
+}
+
+// ───────────────────────── Ratings ─────────────────────────
+
+/** GET /api/driver/reviews?page=1 – how students rated my deliveries */
+export async function reviews(req, res) {
+  const { page, limit, skip } = parsePaging(req.query, 20);
+  const driverId = new mongoose.Types.ObjectId(String(req.user._id));
+  const match = { driver: driverId, driverRating: { $gte: 1 } };
+
+  const [rows, counts] = await Promise.all([
+    Review.find(match)
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(skip)
+      .limit(limit + 1)
+      .select('order customer driverRating comment createdAt')
+      .populate('customer', 'firstName')
+      .populate('order', 'orderNumber')
+      .lean(),
+    page === 1 ? Review.aggregate([{ $match: match }, { $group: { _id: '$driverRating', n: { $sum: 1 } } }]) : null,
+  ]);
+
+  const hasMore = rows.length > limit;
+  const list = rows.slice(0, limit).map((r) => ({
+    _id: r._id,
+    rating: r.driverRating,
+    comment: r.comment,
+    customer: r.customer ? { firstName: r.customer.firstName } : null,
+    orderNumber: r.order?.orderNumber,
+    createdAt: r.createdAt,
+  }));
+
+  const body = { reviews: list, page, hasMore };
+  if (counts) {
+    const breakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    for (const c of counts) breakdown[c._id] = c.n;
+    Object.assign(body, {
+      rating: req.user.driverProfile.rating,
+      ratingCount: req.user.driverProfile.ratingCount,
+      breakdown,
+    });
+  }
+  res.json(body);
 }
 
 // ───────────────────────── Wallet ─────────────────────────

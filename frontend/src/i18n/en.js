@@ -82,6 +82,7 @@ export default {
   'nav.available': 'Available',
   'nav.trips': 'My trips',
   'nav.wallet': 'Wallet',
+  'nav.ratings': 'Ratings',
   'nav.people': 'People',
   'nav.wallets': 'Wallets',
   'nav.more': 'More',
@@ -399,6 +400,27 @@ export default {
   'da.deliveredBtn': '✅ Delivered',
   'da.none': 'No active deliveries',
   'da.noneText': 'Take an order from the Available tab.',
+
+  // Driver delivery history
+  'dh.active': 'Active',
+  'dh.history': 'History',
+  'dh.none': 'No past deliveries yet',
+  'dh.noneText': 'Deliveries you complete will show up here.',
+  'dh.loadMore': 'Show more',
+  'dh.collected': 'Collected {amount} from {name}',
+  'dh.paidCafe': 'Paid the cafe {amount}',
+  'dh.fee': 'Platform fee: {amount}',
+  'dh.earned': 'You earned {amount}',
+  'dh.cancelReason': 'Reason: {reason}',
+
+  // Driver ratings
+  'dr.title': 'My ratings',
+  'dr.average': 'Average rating',
+  'dr.basedOn': 'From {n} ratings',
+  'dr.none': 'No ratings yet',
+  'dr.noneText': 'After a delivery, students can rate you. Their ratings show up here.',
+  'dr.order': 'Order #{n}',
+  'dr.tip': 'Be on time, be polite, and keep the food safe. That is how you get 5 stars.',
 
   // Driver wallet & earnings
   'we.title': 'Wallet & earnings',

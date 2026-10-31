@@ -77,6 +77,7 @@ export default {
   'nav.available': 'ያሉ ስራዎች',
   'nav.trips': 'የእኔ ጉዞዎች',
   'nav.wallet': 'ዋሌት',
+  'nav.ratings': 'ደረጃ',
   'nav.people': 'ሰዎች',
   'nav.wallets': 'ዋሌቶች',
   'nav.more': 'ተጨማሪ',
@@ -379,6 +380,27 @@ export default {
   'da.deliveredBtn': '✅ ደርሷል',
   'da.none': 'በሂደት ላይ ያለ ማድረሻ የለም',
   'da.noneText': 'ከ"ያሉ ስራዎች" ትዕዛዝ ይውሰዱ።',
+
+  // Driver delivery history
+  'dh.active': 'በሂደት ላይ',
+  'dh.history': 'ታሪክ',
+  'dh.none': 'ገና ያለፈ ማድረሻ የለም',
+  'dh.noneText': 'ያደረሷቸው ትዕዛዞች እዚህ ይታያሉ።',
+  'dh.loadMore': 'ተጨማሪ አሳይ',
+  'dh.collected': 'ከ{name} {amount} ተቀብለዋል',
+  'dh.paidCafe': 'ለካፌው {amount} ከፍለዋል',
+  'dh.fee': 'የፕላትፎርም ክፍያ: {amount}',
+  'dh.earned': '{amount} አግኝተዋል',
+  'dh.cancelReason': 'ምክንያት: {reason}',
+
+  // Driver ratings
+  'dr.title': 'የእኔ ደረጃዎች',
+  'dr.average': 'አማካይ ደረጃ',
+  'dr.basedOn': 'ከ{n} ደረጃዎች',
+  'dr.none': 'ገና ደረጃ አልተሰጠዎትም',
+  'dr.noneText': 'ተማሪዎች ከማድረሻ በኋላ ደረጃ ሊሰጡዎት ይችላሉ። እዚህ ይታያሉ።',
+  'dr.order': 'ትዕዛዝ #{n}',
+  'dr.tip': 'በሰዓቱ ይድረሱ፣ በትህትና ያገልግሉ፣ ምግቡን በጥንቃቄ ይያዙ — 5 ኮከብ የሚያስገኘው ይህ ነው።',
 
   'we.title': 'ዋሌት እና ገቢ',
   'we.wallet': 'ዋሌት',

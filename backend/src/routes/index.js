@@ -93,6 +93,7 @@ driverRouter.get('/available', ah(driver.available));
 driverRouter.get('/active', ah(driver.active));
 driverRouter.get('/history', ah(driver.history));
 driverRouter.get('/earnings', ah(driver.earnings));
+driverRouter.get('/reviews', ah(driver.reviews));
 driverRouter.get('/wallet', ah(driver.wallet));
 driverRouter.post('/wallet/topups', ah(driver.topUp));
 driverRouter.post('/orders/:id/claim', ah(driver.claim));

@@ -1297,3 +1297,73 @@ textarea.input {
 a.btn {
   text-decoration: none;
 }
+
+/* Driver delivery history */
+.history-row {
+  width: 100%;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.history-row__main {
+  min-width: 0;
+}
+.history-row__main strong,
+.history-row__main .muted {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.history-row__earned {
+  color: var(--ok);
+  font-weight: 600;
+}
+
+/* Driver ratings */
+.rating-summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: center;
+}
+.rating-summary__score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+.rating-summary__value {
+  font-size: 40px;
+  line-height: 1;
+}
+.rating-summary__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.rating-bar {
+  display: grid;
+  grid-template-columns: 28px 1fr 28px;
+  align-items: center;
+  gap: 8px;
+}
+.rating-bar__track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--soft);
+  overflow: hidden;
+}
+.rating-bar__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: #f5b400;
+}
+.rating-bar__n {
+  text-align: right;
+}
