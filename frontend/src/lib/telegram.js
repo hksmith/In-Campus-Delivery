@@ -9,16 +9,35 @@ export const isInTelegram = Boolean(tg?.initData);
 
 const versionAtLeast = (v) => Boolean(tg?.isVersionAtLeast?.(v));
 
+const THEME_BG = { light: '#F7F6F3', dark: '#0F1015' };
+
+/** Light or dark: follows Telegram's colour scheme (or the device setting in a normal browser) */
+function applyTheme() {
+  const scheme =
+    tg?.colorScheme || (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.documentElement.dataset.theme = scheme;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_BG[scheme]);
+  try {
+    if (tg && versionAtLeast('6.1')) {
+      tg.setBackgroundColor(THEME_BG[scheme]);
+      tg.setHeaderColor(versionAtLeast('6.9') ? THEME_BG[scheme] : 'secondary_bg_color');
+    }
+  } catch {
+    /* older clients */
+  }
+}
+
 export function initTelegram() {
-  if (!tg) return;
+  applyTheme();
+  if (!tg) {
+    window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener?.('change', applyTheme);
+    return;
+  }
   tg.ready();
   tg.expand();
   try {
     if (versionAtLeast('7.7')) tg.disableVerticalSwipes();
-    if (versionAtLeast('6.1')) {
-      tg.setHeaderColor('secondary_bg_color');
-      tg.setBackgroundColor('secondary_bg_color');
-    }
+    tg.onEvent?.('themeChanged', applyTheme);
   } catch {
     /* older clients */
   }

@@ -30,7 +30,6 @@ import CafeSettings from './pages/cafe/CafeSettings.jsx';
 import DriverAvailable from './pages/driver/DriverAvailable.jsx';
 import DriverActive from './pages/driver/DriverActive.jsx';
 import DriverEarnings from './pages/driver/DriverEarnings.jsx';
-import DriverRatings from './pages/driver/DriverRatings.jsx';
 
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import AdminOrders from './pages/admin/AdminOrders.jsx';
@@ -102,7 +101,8 @@ export default function App() {
           <Route path="/driver" element={<RequireRole roles={['driver']}><DriverAvailable /></RequireRole>} />
           <Route path="/driver/active" element={<RequireRole roles={['driver']}><DriverActive /></RequireRole>} />
           <Route path="/driver/earnings" element={<RequireRole roles={['driver']}><DriverEarnings /></RequireRole>} />
-          <Route path="/driver/ratings" element={<RequireRole roles={['driver']}><DriverRatings /></RequireRole>} />
+          {/* Ratings now live in My trips → Ratings tab; old links still work */}
+          <Route path="/driver/ratings" element={<Navigate to="/driver/active?tab=ratings" replace />} />
 
           {/* Admin */}
           <Route path="/admin" element={<RequireRole roles={['admin']}><AdminDashboard /></RequireRole>} />

@@ -8,6 +8,8 @@ import { toast } from '../../lib/toast.js';
 import { useT } from '../../i18n/index.js';
 import { Async, Empty, OrderItems, StatusBadge, Tabs } from '../../components/ui.jsx';
 import { Route } from './DriverAvailable.jsx';
+import DriverRatings from './DriverRatings.jsx';
+import { useSearchParams } from 'react-router-dom';
 
 function DeliveryCard({ order, onChanged }) {
   const t = useT();
@@ -52,6 +54,7 @@ function DeliveryCard({ order, onChanged }) {
       </div>
 
       <Route order={order} />
+      <hr className="divider" />
       <OrderItems items={order.items} />
 
       <div className="banner banner--info small stack stack--sm">
@@ -83,7 +86,7 @@ function DeliveryCard({ order, onChanged }) {
       {beforePickup && (
         <>
           {order.status !== 'ready' && <p className="muted small">{t('da.stillPreparing')}</p>}
-          <button className="btn btn--block" disabled={busy} onClick={pickup}>
+          <button className="btn btn--block btn--lg" disabled={busy} onClick={pickup}>
             {t('da.pickedUpBtn')}
           </button>
           <button className="btn btn--ghost btn--block btn--sm" disabled={busy} onClick={release}>
@@ -231,9 +234,13 @@ function HistoryList() {
   );
 }
 
+const TABS = ['active', 'history', 'ratings'];
+
 export default function DriverActive() {
   const t = useT();
-  const [tab, setTab] = useState('active');
+  const [params, setParams] = useSearchParams();
+  const tab = TABS.includes(params.get('tab')) ? params.get('tab') : 'active';
+  const setTab = (value) => setParams(value === 'active' ? {} : { tab: value }, { replace: true });
 
   return (
     <div className="page stack">
@@ -244,9 +251,12 @@ export default function DriverActive() {
         tabs={[
           { value: 'active', label: t('dh.active') },
           { value: 'history', label: t('dh.history') },
+          { value: 'ratings', label: t('nav.ratings') },
         ]}
       />
-      {tab === 'active' ? <ActiveList /> : <HistoryList />}
+      {tab === 'active' && <ActiveList />}
+      {tab === 'history' && <HistoryList />}
+      {tab === 'ratings' && <DriverRatings />}
     </div>
   );
 }

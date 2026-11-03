@@ -6,7 +6,10 @@ import { money } from '../../lib/format.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useCart } from '../../context/CartContext.jsx';
 import { useT } from '../../i18n/index.js';
-import { Async, Empty, Rating, StatusBadge } from '../../components/ui.jsx';
+import { Async, Empty, FloatingCart, Rating, SearchInput, StatusBadge } from '../../components/ui.jsx';
+import Icon from '../../components/Icon.jsx';
+import { TopBar } from '../../components/Layout.jsx';
+import { TRACK_STEPS } from '../../lib/constants.js';
 import { useSocketEvent } from '../../lib/socket.js';
 
 export function CafeCard({ cafe }) {
@@ -20,16 +23,26 @@ export function CafeCard({ cafe }) {
           <span className={`dot ${cafe.isOpen ? 'dot--ok' : 'dot--bad'}`}>{cafe.isOpen ? t('home.open') : t('home.closed')}</span>
         </div>
         {cafe.description && <div className="muted small clamp">{cafe.description}</div>}
-        <div className="row row--wrap small muted">
+        <div className="meta">
           <Rating value={cafe.rating} count={cafe.ratingCount} />
-          <span>· {t('home.min', { n: cafe.prepTimeMinutes })}</span>
           <span>
-            · {cafe.openingTime}–{cafe.closingTime}
+            <Icon name="clock" size={13} />
+            {t('home.min', { n: cafe.prepTimeMinutes })}
+          </span>
+          <span>
+            {cafe.openingTime}–{cafe.closingTime}
           </span>
         </div>
         {cafe.area && (
-          <div className="small muted">
-            📍 {cafe.area.name} · 🛵 {t('home.deliveryFrom', { fee: money(cafe.area.deliveryFee) })}
+          <div className="meta">
+            <span>
+              <Icon name="pin" size={13} />
+              {cafe.area.name}
+            </span>
+            <span>
+              <Icon name="bike" size={14} />
+              {t('home.deliveryFrom', { fee: money(cafe.area.deliveryFee) })}
+            </span>
           </div>
         )}
       </div>
@@ -44,18 +57,30 @@ function ActiveOrdersStrip() {
   const orders = data?.orders || [];
   if (!orders.length) return null;
   return (
-    <div className="stack">
-      {orders.map((o) => (
-        <Link key={o._id} to={`/orders/${o._id}`} className="active-order">
-          <div>
-            <strong>#{o.orderNumber}</strong> · {o.cafe?.name}
-            <div className="muted small">
-              {money(o.total)} · {t('home.tapToTrack')}
+    <div className="stack stack--sm">
+      {orders.map((o) => {
+        const step = TRACK_STEPS.indexOf(o.status);
+        return (
+          <Link key={o._id} to={`/orders/${o._id}`} className="active-order">
+            <div className="active-order__top">
+              <div style={{ minWidth: 0 }}>
+                <strong>
+                  #{o.orderNumber} · {o.cafe?.name}
+                </strong>
+                <div className="muted small">
+                  {money(o.total)} · {t('home.tapToTrack')}
+                </div>
+              </div>
+              <StatusBadge status={o.status} />
             </div>
-          </div>
-          <StatusBadge status={o.status} />
-        </Link>
-      ))}
+            <div className="progress">
+              {TRACK_STEPS.slice(1).map((s, i) => (
+                <span key={s} className={i < step ? 'on' : ''} />
+              ))}
+            </div>
+          </Link>
+        );
+      })}
     </div>
   );
 }
@@ -86,57 +111,66 @@ export default function Home() {
   }, [q]);
 
   return (
-    <div className="page stack">
-      <div>
-        <h2 className="greeting">{t('home.hi', { name: user.firstName || user.fullName?.split(' ')[0] || '' })}</h2>
-        <p className="muted">{t('home.what')}</p>
+    <>
+      <div className="hero">
+        <TopBar hero />
+        <div className="hero__greet">
+          <h2 className="greeting">{t('home.hi', { name: user.firstName || user.fullName?.split(' ')[0] || '' })}</h2>
+          <p>{t('home.what')}</p>
+        </div>
+        <SearchInput placeholder={t('home.search')} value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
 
-      {settings?.announcement && <div className="banner banner--info">📢 {settings.announcement}</div>}
+      <div className="page stack">
+        {settings?.announcement && (
+          <div className="banner banner--info announce">
+            <span className="announce__icon">📢</span>
+            <span>{settings.announcement}</span>
+          </div>
+        )}
 
-      <ActiveOrdersStrip />
+        <ActiveOrdersStrip />
 
-      <input className="input input--search" placeholder={t('home.search')} value={q} onChange={(e) => setQ(e.target.value)} />
+        {results ? (
+          <div className="stack stack--sm">
+            {results.cafes.map((c) => (
+              <CafeCard key={c._id} cafe={c} />
+            ))}
+            {results.items.map((i) => (
+              <Link key={i._id} to={`/cafes/${i.cafe?._id}`} className="list-link">
+                <span>
+                  {i.name}
+                  <span className="muted small block">{i.cafe?.name}</span>
+                </span>
+                <strong>{money(i.price)}</strong>
+              </Link>
+            ))}
+            {!results.cafes.length && !results.items.length && <Empty icon="🔍" text={t('home.nothingFound')} />}
+          </div>
+        ) : (
+          <Async loading={loading} error={error} reload={reload}>
+            {data?.cafes?.length ? (
+              <div className="stack stack--sm">
+                <h3 className="section-title">{t('home.cafes')}</h3>
+                {data.cafes.map((c) => (
+                  <CafeCard key={c._id} cafe={c} />
+                ))}
+              </div>
+            ) : (
+              <Empty icon="🏪" title={t('home.noCafes')} text={t('home.noCafesText')} />
+            )}
+          </Async>
+        )}
 
-      {results ? (
-        <div className="stack">
-          {results.cafes.map((c) => (
-            <CafeCard key={c._id} cafe={c} />
-          ))}
-          {results.items.map((i) => (
-            <Link key={i._id} to={`/cafes/${i.cafe?._id}`} className="list-link">
-              <span>
-                {i.name}
-                <span className="muted small block">{i.cafe?.name}</span>
-              </span>
-              <strong>{money(i.price)}</strong>
-            </Link>
-          ))}
-          {!results.cafes.length && !results.items.length && <Empty icon="🔍" text={t('home.nothingFound')} />}
-        </div>
-      ) : (
-        <Async loading={loading} error={error} reload={reload}>
-          {data?.cafes?.length ? (
-            <div className="stack">
-              <h3 className="section-title">{t('home.cafes')}</h3>
-              {data.cafes.map((c) => (
-                <CafeCard key={c._id} cafe={c} />
-              ))}
-            </div>
-          ) : (
-            <Empty icon="🏪" title={t('home.noCafes')} text={t('home.noCafesText')} />
-          )}
-        </Async>
-      )}
-
-      {cart.count > 0 && (
-        <Link to="/cart" className="floating-cart">
-          <span>
-            🛒 {t('common.items', { n: cart.count })} · {cart.cafe?.name}
-          </span>
-          <strong>{money(cart.subtotal)}</strong>
-        </Link>
-      )}
-    </div>
+        {cart.count > 0 && (
+          <FloatingCart
+            count={cart.count}
+            title={cart.cafe?.name}
+            subtitle={t('common.items', { n: cart.count })}
+            total={money(cart.subtotal)}
+          />
+        )}
+      </div>
+    </>
   );
 }

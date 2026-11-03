@@ -6,6 +6,8 @@ import { uploadImage, errorMessage } from '../lib/api.js';
 import { money } from '../lib/format.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useT } from '../i18n/index.js';
+import { Link } from 'react-router-dom';
+import Icon from './Icon.jsx';
 
 export function Loader({ label, full = false }) {
   const t = useT();
@@ -53,7 +55,12 @@ export function Async({ loading, error, reload, children }) {
 export function StatusBadge({ status }) {
   const t = useT();
   const s = STATUS[status] || { tone: 'info' };
-  return <span className={`badge badge--${s.tone}`}>{t(`statusShort.${status}`)}</span>;
+  return (
+    <span className={`badge badge--${s.tone}`}>
+      {s.icon && <span aria-hidden="true">{s.icon}</span>}
+      {t(`statusShort.${status}`)}
+    </span>
+  );
 }
 
 export function Toggle({ checked, onChange, disabled, label }) {
@@ -108,8 +115,9 @@ export function Rating({ value, count }) {
   const t = useT();
   if (!count) return <span className="muted small">{t('ui.ratingNew')}</span>;
   return (
-    <span className="small">
-      ⭐ {Number(value).toFixed(1)} <span className="muted">({count})</span>
+    <span className="rating small">
+      <Icon name="star" size={13} fill />
+      <strong>{Number(value).toFixed(1)}</strong> <span className="muted">({count})</span>
     </span>
   );
 }
@@ -131,7 +139,7 @@ export function Sheet({ open, onClose, title, children }) {
         <div className="sheet__head">
           <h3>{title}</h3>
           <button className="icon-btn" onClick={onClose} aria-label="Close">
-            ✕
+            <Icon name="x" size={16} />
           </button>
         </div>
         <div className="sheet__body">{children}</div>
@@ -298,6 +306,32 @@ export function StatGrid({ items }) {
           <div className="stat__label">{s.label}</div>
         </div>
       ))}
+    </div>
+  );
+}
+
+/** Dark "cart" bar that floats above the bottom navigation */
+export function FloatingCart({ count, title, subtitle, total }) {
+  return (
+    <Link to="/cart" className="floating-cart">
+      <span className="floating-cart__count">{count}</span>
+      <span className="floating-cart__label">
+        <strong>{title}</strong>
+        {subtitle && <span>{subtitle}</span>}
+      </span>
+      <span className="floating-cart__total">
+        {total} <Icon name="chev" size={14} />
+      </span>
+    </Link>
+  );
+}
+
+/** Search input with a magnifier icon */
+export function SearchInput({ value, onChange, placeholder }) {
+  return (
+    <div className="search">
+      <Icon name="search" size={18} />
+      <input className="input input--search" placeholder={placeholder} value={value} onChange={onChange} />
     </div>
   );
 }

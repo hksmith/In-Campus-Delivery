@@ -184,7 +184,7 @@ export default {
   'home.hi': 'ሰላም {name} 👋',
   'home.what': 'ዛሬ ምን ይበላሉ?',
   'home.tapToTrack': 'ለመከታተል ይጫኑ',
-  'home.search': '🔍 ካፌ ወይም ምግብ ይፈልጉ (ሽሮ፣ በርገር…)',
+  'home.search': 'ካፌ ወይም ምግብ ይፈልጉ (ሽሮ፣ በርገር…)',
   'home.cafes': 'ካፌዎች',
   'home.noCafes': 'ገና ካፌ የለም',
   'home.noCafesText': 'ካፌዎች ሲቀላቀሉ እዚህ ይታያሉ።',
@@ -202,7 +202,7 @@ export default {
   'menu.added': '{name} ተጨምሯል',
   'menu.replaceCart': 'ጋሪዎ ከ{a} ምግቦች አሉት። ከ{b} አዲስ ጋሪ ይጀምሩ?',
   'menu.empty': 'ገና የሜኑ ምግብ የለም',
-  'menu.viewCart': '🛒 ጋሪ ይመልከቱ ({n})',
+  'menu.viewCart': 'ጋሪ ይመልከቱ ({n})',
 
   'cart.emptyTitle': 'ጋሪዎ ባዶ ነው',
   'cart.emptyText': 'ካፌ ይምረጡና የሚጣፍጥ ነገር ይጨምሩ።',
@@ -347,8 +347,8 @@ export default {
   'set.staffAdded': 'ሰራተኛ ተጨምሯል',
   'set.myProfile': '👤 የግል መገለጫዬ',
 
-  'drv.online': '🟢 ኦንላይን ነዎት',
-  'drv.offline': '⚪ ኦፍላይን ነዎት',
+  'drv.online': 'ኦንላይን ነዎት',
+  'drv.offline': 'ኦፍላይን ነዎት',
   'drv.onlineSub': 'አዲስ ማድረሻ ሲኖር መልዕክት ይደርስዎታል',
   'drv.offlineSub': 'ማድረሻ ለመውሰድ ኦንላይን ይሁኑ',
   'drv.availableTitle': 'ያሉ ማድረሻዎች',

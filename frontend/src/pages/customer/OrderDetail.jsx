@@ -9,29 +9,54 @@ import { callPhone, confirmDialog, openTelegramUser, useBackButton } from '../..
 import { toast } from '../../lib/toast.js';
 import { useCart } from '../../context/CartContext.jsx';
 import { useT } from '../../i18n/index.js';
-import { Async, OrderItems, Stars, StatusBadge } from '../../components/ui.jsx';
+import { Async, OrderItems, Stars } from '../../components/ui.jsx';
+import Icon from '../../components/Icon.jsx';
 
-function Timeline({ order }) {
+function Stepper({ order }) {
   const t = useT();
-  const failed = ['cancelled', 'rejected'].includes(order.status);
   const current = TRACK_STEPS.indexOf(order.status);
   return (
-    <ol className="timeline">
+    <ol className="stepper">
       {TRACK_STEPS.map((step, idx) => {
-        const done = !failed && idx <= current;
+        const done = idx < current || (idx === current && step === 'delivered');
         const entry = order.statusHistory?.find((h) => h.status === step);
         return (
           <li
             key={step}
-            className={`timeline__step ${done ? 'timeline__step--done' : ''} ${idx === current ? 'timeline__step--current' : ''}`}
+            className={`${idx <= current ? 'done' : ''} ${idx === current && !done ? 'current' : ''} ${idx < current ? 'linked' : ''}`}
           >
-            <span className="timeline__dot">{done ? STATUS[step].icon : ''}</span>
-            <span className="timeline__label">{t(`status.${step}`)}</span>
-            {entry && <span className="muted small">{time(entry.at)}</span>}
+            <span className="stepper__dot">{done ? <Icon name="check" size={13} /> : null}</span>
+            <span>{t(`statusShort.${step}`)}</span>
+            {entry && <span className="stepper__time">{time(entry.at)}</span>}
           </li>
         );
       })}
     </ol>
+  );
+}
+
+const HERO_TONE = { pending: 'wait', delivered: 'ok', cancelled: 'bad', rejected: 'bad' };
+
+/** Big coloured card at the top: what is happening now + progress */
+function StatusHero({ order }) {
+  const t = useT();
+  const failed = ['cancelled', 'rejected'].includes(order.status);
+  let sub = null;
+  if (order.status === 'pending') sub = t('od.waiting', { cafe: order.cafe?.name });
+  else if (['accepted', 'preparing'].includes(order.status) && order.estimatedReadyAt)
+    sub = t('od.readyIn', { n: Math.max(1, minutesUntil(order.estimatedReadyAt)) });
+  else if (failed && order.cancelReason) sub = order.cancelReason;
+  return (
+    <div className={`status-hero ${HERO_TONE[order.status] ? `status-hero--${HERO_TONE[order.status]}` : ''}`}>
+      <div className="status-hero__main">
+        <span className="status-hero__icon">{STATUS[order.status]?.icon}</span>
+        <div>
+          <h3>{t(`status.${order.status}`)}</h3>
+          {sub && <p>{String(sub).replace(/^[\p{Extended_Pictographic}\u200d\ufe0f\s]+/u, '')}</p>}
+        </div>
+      </div>
+      {!failed && <Stepper order={order} />}
+    </div>
   );
 }
 
@@ -123,38 +148,38 @@ export default function OrderDetail() {
     <Async loading={loading} error={error} reload={reload}>
       {order && (
         <div className="page stack">
-          <div className="row row--between">
+          <div className="page-head">
             <div>
               <h2>{t('od.title', { n: order.orderNumber })}</h2>
-              <div className="muted small">{dateTime(order.createdAt)}</div>
+              <div className="muted small">
+                {dateTime(order.createdAt)} · {order.cafe?.name}
+              </div>
             </div>
-            <StatusBadge status={order.status} />
           </div>
 
-          {order.status === 'pending' && <div className="banner banner--warn">{t('od.waiting', { cafe: order.cafe?.name })}</div>}
-          {['accepted', 'preparing'].includes(order.status) && order.estimatedReadyAt && (
-            <div className="banner banner--info">{t('od.readyIn', { n: Math.max(1, minutesUntil(order.estimatedReadyAt)) })}</div>
-          )}
-          {['cancelled', 'rejected'].includes(order.status) && (
-            <div className="banner banner--bad">
-              {t(`status.${order.status}`)}
-              {order.cancelReason ? `: ${order.cancelReason}` : ''}
-            </div>
-          )}
+          <StatusHero order={order} />
 
           {['picked_up', 'ready', 'preparing', 'accepted'].includes(order.status) && order.deliveryCode && (
             <div className="code-card">
               <div className="muted small">{t('od.codeTitle')}</div>
-              <div className="code-card__code">{order.deliveryCode}</div>
-              <div className="small">{t('od.payCash', { amount: money(order.total) })}</div>
+              <div className="code-card__code">
+                {String(order.deliveryCode)
+                  .split('')
+                  .map((d, i) => (
+                    <span key={i}>{d}</span>
+                  ))}
+              </div>
+              <div className="cash-note">
+                <Icon name="cash" size={17} />
+                {t('od.payCash', { amount: money(order.total) }).replace(/^💵\s*/, '')}
+              </div>
             </div>
           )}
 
-          {!['cancelled', 'rejected'].includes(order.status) && <Timeline order={order} />}
-
           {order.driver && order.status !== 'delivered' && (
-            <div className="card row row--between">
-              <div>
+            <div className="card person">
+              <span className="avatar">{personName(order.driver).charAt(0)}</span>
+              <div className="person__info">
                 <div className="muted small">{t('od.yourDriver')}</div>
                 <strong>{personName(order.driver)}</strong>
               </div>
@@ -165,7 +190,7 @@ export default function OrderDetail() {
                   </button>
                 )}
                 {order.driver.username && (
-                  <button className="btn btn--secondary btn--sm" onClick={() => openTelegramUser(order.driver.username)}>
+                  <button className="btn btn--sm" onClick={() => openTelegramUser(order.driver.username)}>
                     {t('common.chat')}
                   </button>
                 )}
@@ -197,9 +222,12 @@ export default function OrderDetail() {
             </div>
           </div>
 
-          <div className="card small">
-            📍 {placeName(order.delivery)}
-            {order.delivery?.details ? ` – ${order.delivery.details}` : ''}
+          <div className="card small meta" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+            <span>
+              <Icon name="pin" size={15} />
+              {placeName(order.delivery)}
+              {order.delivery?.details ? ` – ${order.delivery.details}` : ''}
+            </span>
             {order.note && <div className="muted">📝 {order.note}</div>}
           </div>
 

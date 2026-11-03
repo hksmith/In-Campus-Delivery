@@ -35,6 +35,7 @@ function Summary({ rating, count, breakdown }) {
   );
 }
 
+/** Average, star breakdown and the latest reviews. Shown as the "Ratings" tab in My trips. */
 export default function DriverRatings() {
   const t = useT();
   const [summary, setSummary] = useState(null);
@@ -73,8 +74,7 @@ export default function DriverRatings() {
   }, [load]);
 
   return (
-    <div className="page stack">
-      <h2>{t('dr.title')}</h2>
+    <>
       <Async loading={loading} error={error} reload={() => load(1)}>
         {summary?.count ? (
           <div className="stack">
@@ -104,6 +104,6 @@ export default function DriverRatings() {
           <Empty icon="⭐" title={t('dr.none')} text={t('dr.noneText')} />
         )}
       </Async>
-    </div>
+    </>
   );
 }

@@ -195,7 +195,7 @@ export default {
   'home.hi': 'Hi {name} 👋',
   'home.what': 'What are you eating today?',
   'home.tapToTrack': 'tap to track',
-  'home.search': '🔍 Search cafes or food (shiro, burger…)',
+  'home.search': 'Search cafes or food (shiro, burger…)',
   'home.cafes': 'Cafes',
   'home.noCafes': 'No cafes yet',
   'home.noCafesText': 'Cafes will appear here once they join.',
@@ -214,7 +214,7 @@ export default {
   'menu.added': 'Added {name}',
   'menu.replaceCart': 'Your cart has items from {a}. Start a new cart from {b}?',
   'menu.empty': 'No menu items yet',
-  'menu.viewCart': '🛒 View cart ({n})',
+  'menu.viewCart': 'View cart ({n})',
 
   // Cart
   'cart.emptyTitle': 'Your cart is empty',
@@ -367,8 +367,8 @@ export default {
   'set.myProfile': '👤 My personal profile',
 
   // Driver
-  'drv.online': '🟢 You are online',
-  'drv.offline': '⚪ You are offline',
+  'drv.online': 'You are online',
+  'drv.offline': 'You are offline',
   'drv.onlineSub': 'You get a message when a new delivery appears',
   'drv.offlineSub': 'Go online to take deliveries',
   'drv.availableTitle': 'Available deliveries',

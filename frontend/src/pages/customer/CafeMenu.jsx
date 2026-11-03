@@ -1,12 +1,14 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useApi } from '../../lib/hooks.js';
 import { money } from '../../lib/format.js';
 import { confirmDialog, haptic, useBackButton } from '../../lib/telegram.js';
 import { toast } from '../../lib/toast.js';
 import { useCart } from '../../context/CartContext.jsx';
 import { useT } from '../../i18n/index.js';
-import { Async, Empty, Rating, Sheet } from '../../components/ui.jsx';
+import { Async, Empty, FloatingCart, Sheet } from '../../components/ui.jsx';
+import Icon from '../../components/Icon.jsx';
+import LanguageSwitch from '../../components/LanguageSwitch.jsx';
 
 function ItemSheet({ item, cafe, onClose }) {
   const t = useT();
@@ -93,28 +95,68 @@ export default function CafeMenu() {
     <Async loading={loading} error={error} reload={reload}>
       {cafe && (
         <div className="page stack">
-          <div className="cafe-hero">
-            {cafe.logo ? <img src={cafe.logo} alt="" className="cafe-hero__logo" /> : <div className="cafe-hero__logo">🍽</div>}
-            <div>
-              <h2>{cafe.name}</h2>
-              <div className="muted small">
-                <Rating value={cafe.rating} count={cafe.ratingCount} /> · {t('home.min', { n: cafe.prepTimeMinutes })} ·{' '}
-                {cafe.openingTime}–{cafe.closingTime}
-              </div>
-              {(cafe.area || cafe.campusSpot) && (
-                <div className="muted small">
-                  📍 {[cafe.area?.name, cafe.campusSpot].filter(Boolean).join(' · ')}
-                  {cafe.area && <> · 🛵 {t('home.deliveryFrom', { fee: money(cafe.area.deliveryFee) })}</>}
-                </div>
-              )}
+          <div className="cafe-cover">
+            {cafe.logo ? (
+              <img src={cafe.logo} alt="" className="cafe-cover__img" />
+            ) : (
+              <div className="cafe-cover__pattern">🥘🍔🥤☕🫓🍟🥘🍔🥤☕🫓🍟🥘🍔🥤☕🫓🍟🥘🍔🥤☕🫓🍟</div>
+            )}
+            <div className="cafe-cover__bar">
+              <button className="round-btn" onClick={back} aria-label="Back">
+                <Icon name="back" size={18} />
+              </button>
+              <LanguageSwitch compact />
             </div>
           </div>
-          {cafe.description && <p className="muted">{cafe.description}</p>}
+          <div className="cafe-info">
+            <div className="cafe-hero">
+              {cafe.logo ? <img src={cafe.logo} alt="" className="cafe-hero__logo" /> : <div className="cafe-hero__logo">🍽</div>}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="row row--between" style={{ alignItems: 'flex-start' }}>
+                  <h2>{cafe.name}</h2>
+                  <span className={`dot ${cafe.isOpen ? 'dot--ok' : 'dot--bad'}`}>{cafe.isOpen ? t('home.open') : t('home.closed')}</span>
+                </div>
+                {cafe.description && <p className="muted small clamp">{cafe.description}</p>}
+              </div>
+            </div>
+            <div className="facts">
+              <div>
+                <strong>
+                  {cafe.ratingCount ? (
+                    <>
+                      <Icon name="star" size={13} fill /> {Number(cafe.rating).toFixed(1)}
+                    </>
+                  ) : (
+                    '—'
+                  )}
+                </strong>
+                <span>{cafe.ratingCount ? `(${cafe.ratingCount})` : t('ui.ratingNew')}</span>
+              </div>
+              <div>
+                <strong>{t('home.min', { n: cafe.prepTimeMinutes })}</strong>
+                <span>
+                  {cafe.openingTime}–{cafe.closingTime}
+                </span>
+              </div>
+              <div>
+                <strong>{cafe.area ? money(cafe.area.deliveryFee) : '—'}</strong>
+                <span>{t('cart.delivery')}</span>
+              </div>
+            </div>
+            {(cafe.area || cafe.campusSpot) && (
+              <div className="meta">
+                <span>
+                  <Icon name="pin" size={13} />
+                  {[cafe.area?.name, cafe.campusSpot].filter(Boolean).join(' · ')}
+                </span>
+              </div>
+            )}
+          </div>
           {!cafe.isOpen && <div className="banner banner--bad">{t('menu.closedBanner')}</div>}
           {cafe.minOrderAmount > 0 && <div className="muted small">{t('menu.minOrder', { amount: money(cafe.minOrderAmount) })}</div>}
 
           {categories.length > 2 && (
-            <div className="chips-scroll">
+            <div className="chips-scroll chips-sticky">
               {categories.map((c) => (
                 <button key={c} className={`chip ${category === c ? 'chip--active' : ''}`} onClick={() => setCategory(c)}>
                   {c === '__all' ? t('common.all') : c}
@@ -146,8 +188,16 @@ export default function CafeMenu() {
                           {money(item.price)} {!item.isAvailable && <span className="badge badge--bad">{t('ui.soldOut')}</span>}
                         </span>
                       </div>
-                      {item.image ? <img src={item.image} alt="" className="menu-item__img" /> : null}
-                      {inCart > 0 && <span className="menu-item__count">{inCart}</span>}
+                      {item.image ? (
+                        <span className="menu-item__media">
+                          <img src={item.image} alt="" className="menu-item__img" />
+                          {inCart > 0 ? <span className="menu-item__count">{inCart}</span> : <span className="menu-item__add">+</span>}
+                        </span>
+                      ) : inCart > 0 ? (
+                        <span className="menu-item__count menu-item__count--solo">{inCart}</span>
+                      ) : (
+                        <span className="menu-item__add menu-item__add--solo">+</span>
+                      )}
                     </button>
                   );
                 })}
@@ -157,10 +207,12 @@ export default function CafeMenu() {
           {selected && <ItemSheet item={selected} cafe={cafe} onClose={() => setSelected(null)} />}
 
           {cart.count > 0 && cart.cafe?._id === cafe._id && (
-            <Link to="/cart" className="floating-cart">
-              <span>{t('menu.viewCart', { n: cart.count })}</span>
-              <strong>{money(cart.subtotal)}</strong>
-            </Link>
+            <FloatingCart
+              count={cart.count}
+              title={t('menu.viewCart', { n: cart.count })}
+              subtitle={cafe.name}
+              total={money(cart.subtotal)}
+            />
           )}
         </div>
       )}
