@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { api, errorMessage } from '../lib/api.js';
 import { setCurrency } from '../lib/format.js';
 import { connectSocket, disconnectSocket, useSocketEvent } from '../lib/socket.js';
+import { clearApiCache } from '../lib/hooks.js';
 import { setLanguage } from '../i18n/index.js';
 
 const AuthContext = createContext(null);
@@ -45,6 +46,7 @@ export function AuthProvider({ children }) {
   const role = state.user?.role;
   useEffect(() => {
     if (!userId) return undefined;
+    clearApiCache(); // a different user or role sees different data
     connectSocket();
     return () => disconnectSocket();
   }, [userId, role]);

@@ -51,6 +51,12 @@ const PATHS = {
       <path d="M8.5 17h6l2.5-7h-4M17 10l1.5 7M5.5 17l3-6h5" />
     </>
   ),
+  alert: (
+    <>
+      <path d="M12 3 2 20h20z" />
+      <path d="M12 10v4M12 17v.5" />
+    </>
+  ),
   chev: <path d="m9 6 6 6-6 6" />,
   back: <path d="m15 6-6 6 6 6" />,
   box: (

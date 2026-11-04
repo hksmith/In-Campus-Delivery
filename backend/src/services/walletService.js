@@ -235,7 +235,7 @@ export async function requestTopUp(driver, { amount, method, reference, accountS
   if (auto) result = await runVerification(tx, { minAmount: settings.minTopUp });
 
   if (['review', 'unavailable'].includes(result.outcome)) {
-    emitTo(rooms.admins, 'admin:topups', {});
+    emitTo(rooms.admins, 'admin:topups', { isNew: true, name: driver.displayName, amount: tx.amount });
     notifyAdmins(
       (lang) =>
         tr(lang, result.outcome === 'unavailable' ? 'topupCheckDown' : auto ? 'topupReview' : 'topupRequest', {

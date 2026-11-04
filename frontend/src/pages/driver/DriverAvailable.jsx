@@ -66,10 +66,7 @@ export default function DriverAvailable() {
   const [busy, run] = useAction();
 
   useSocketEvent('pool:changed', () => reload());
-  useSocketEvent('pool:new', () => {
-    haptic.warning();
-    reload();
-  });
+  useSocketEvent('pool:new', () => reload());
   useSocketEvent('me:updated', () => reload());
 
   const claim = (order) =>
@@ -89,6 +86,11 @@ export default function DriverAvailable() {
   return (
     <div className="page stack">
       <OnlineSwitch />
+      {!online && orders.length > 0 && (
+        <div className="banner banner--warn">
+          <strong>{t('nt.drv.missing', { n: orders.length })}</strong> {t('nt.drv.missingSub')}
+        </div>
+      )}
       {wallet && (walletLow || wallet.available <= 0 || wallet.isLow) && (
         <div className="banner banner--warn row row--between announce" style={{ alignItems: 'center' }}>
           <span className="announce__icon">💵</span>

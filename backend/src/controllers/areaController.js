@@ -2,6 +2,7 @@ import { Area, Cafe } from '../models/index.js';
 import { ApiError } from '../utils/ApiError.js';
 import { assertObjectId, pick } from '../utils/helpers.js';
 import { emitTo, rooms } from '../services/realtime.js';
+import { clearAreaCache } from '../services/areas.js';
 
 const FIELDS = ['name', 'description', 'deliveryFee', 'isActive', 'sortOrder'];
 
@@ -40,6 +41,7 @@ export async function create(req, res) {
   if (!data.name) throw ApiError.badRequest('Enter the area name');
   if (data.deliveryFee === undefined) throw ApiError.badRequest('Enter a delivery fee of 0 or more');
   const area = await Area.create(data);
+  clearAreaCache();
   emitTo(rooms.admins, 'admin:areas', {});
   res.status(201).json({ area });
 }
@@ -54,6 +56,7 @@ export async function update(req, res) {
   }
   Object.assign(area, data);
   await area.save();
+  clearAreaCache();
   res.json({ area });
 }
 
@@ -68,9 +71,11 @@ export async function remove(req, res) {
   if (used) {
     area.isActive = false;
     await area.save();
+    clearAreaCache();
     return res.json({ deactivated: true, area });
   }
   await area.deleteOne();
+  clearAreaCache();
   res.json({ deleted: true });
 }
 

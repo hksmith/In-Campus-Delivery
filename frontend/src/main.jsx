@@ -6,6 +6,7 @@ import { PromptHost, Toaster } from './components/ui.jsx';
 import ContactHost from './components/ContactHost.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { CartProvider } from './context/CartContext.jsx';
+import { NotificationProvider } from './context/NotificationContext.jsx';
 import { initTelegram } from './lib/telegram.js';
 import './styles.css';
 
@@ -16,7 +17,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
-          <App />
+          <NotificationProvider>
+            <App />
+          </NotificationProvider>
           <Toaster />
           <PromptHost />
           <ContactHost />

@@ -105,5 +105,10 @@ orderSchema.index({ status: 1, driver: 1, createdAt: -1 });
 orderSchema.index({ cafe: 1, status: 1, createdAt: -1 });
 orderSchema.index({ customer: 1, createdAt: -1 });
 orderSchema.index({ driver: 1, status: 1, deliveredAt: -1 });
+// Open pickup problems (admin badge + dashboard) – small index, only reported orders
+orderSchema.index(
+  { 'pickupIssue.resolved': 1 },
+  { partialFilterExpression: { 'pickupIssue.reported': true }, name: 'open_pickup_issues' }
+);
 
 export const Order = mongoose.model('Order', orderSchema);

@@ -19,8 +19,20 @@ export async function ensureDefaultAreas() {
 }
 
 /** The first active area – used for cafes/places that don't have an area yet (old data) */
+let defaultCache = null;
+let defaultCacheAt = 0;
+const AREA_CACHE_MS = 60_000;
+
 export async function defaultArea() {
-  return Area.findOne({ isActive: true }).sort({ sortOrder: 1, name: 1 }).lean();
+  if (defaultCache && Date.now() - defaultCacheAt < AREA_CACHE_MS) return defaultCache;
+  defaultCache = await Area.findOne({ isActive: true }).sort({ sortOrder: 1, name: 1 }).lean();
+  defaultCacheAt = Date.now();
+  return defaultCache;
+}
+
+/** Call after an area is added or changed so the new fee/name shows at once */
+export function clearAreaCache() {
+  defaultCache = null;
 }
 
 /** Returns the area document for an id (or the default area if missing/inactive) */

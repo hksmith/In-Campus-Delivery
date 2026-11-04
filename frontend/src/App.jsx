@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { lazy, useEffect, useRef } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import { isInTelegram } from './lib/telegram.js';
@@ -8,11 +8,53 @@ import { useT } from './i18n/index.js';
 import Layout from './components/Layout.jsx';
 import { Loader } from './components/ui.jsx';
 
+// Shop screens load with the app; cafe, driver and admin screens (and the sign-up forms)
+// download only when someone opens them, so students get a smaller, faster app.
 import Onboarding from './pages/shared/Onboarding.jsx';
 import ChooseStart from './pages/shared/ChooseStart.jsx';
 import Profile from './pages/shared/Profile.jsx';
-import ApplyDriver from './pages/shared/ApplyDriver.jsx';
-import RegisterCafe from './pages/shared/RegisterCafe.jsx';
+/**
+ * Like React.lazy, but if a new version was deployed while the app was open (old files gone),
+ * reload once to get the new version instead of showing an error.
+ */
+function lazyPage(load) {
+  return lazy(() =>
+    load()
+      .then((mod) => {
+        try {
+          sessionStorage.removeItem('chunkReload'); // loaded fine – a later deploy may reload again
+        } catch {
+          /* storage blocked */
+        }
+        return mod;
+      })
+      .catch((err) => {
+      let reloaded = false;
+      try {
+        reloaded = sessionStorage.getItem('chunkReload') === '1';
+        if (!reloaded) sessionStorage.setItem('chunkReload', '1');
+      } catch {
+        /* storage blocked */
+      }
+      if (!reloaded) {
+        window.location.reload();
+        return new Promise(() => {});
+      }
+      throw err;
+    })
+  );
+}
+
+/** Start downloading a role's dashboard screens as soon as we know who opened the app */
+const PREFETCH = {
+  driver: () => [import('./pages/driver/DriverAvailable.jsx'), import('./pages/driver/DriverActive.jsx')],
+  cafe_owner: () => [import('./pages/cafe/CafeOrders.jsx'), import('./pages/cafe/CafeMenuManager.jsx')],
+  cafe_staff: () => [import('./pages/cafe/CafeOrders.jsx'), import('./pages/cafe/CafeMenuManager.jsx')],
+  admin: () => [import('./pages/admin/AdminDashboard.jsx'), import('./pages/admin/AdminOrders.jsx'), import('./pages/admin/AdminPeople.jsx')],
+};
+
+const ApplyDriver = lazyPage(() => import('./pages/shared/ApplyDriver.jsx'));
+const RegisterCafe = lazyPage(() => import('./pages/shared/RegisterCafe.jsx'));
 import { BlockedScreen, NotInTelegram } from './pages/shared/Screens.jsx';
 
 import Home from './pages/customer/Home.jsx';
@@ -21,24 +63,24 @@ import Cart from './pages/customer/Cart.jsx';
 import Orders from './pages/customer/Orders.jsx';
 import OrderDetail from './pages/customer/OrderDetail.jsx';
 
-import CafeOrders from './pages/cafe/CafeOrders.jsx';
-import CafeMenuManager from './pages/cafe/CafeMenuManager.jsx';
-import MenuItemForm from './pages/cafe/MenuItemForm.jsx';
-import CafeStats from './pages/cafe/CafeStats.jsx';
-import CafeSettings from './pages/cafe/CafeSettings.jsx';
+const CafeOrders = lazyPage(() => import('./pages/cafe/CafeOrders.jsx'));
+const CafeMenuManager = lazyPage(() => import('./pages/cafe/CafeMenuManager.jsx'));
+const MenuItemForm = lazyPage(() => import('./pages/cafe/MenuItemForm.jsx'));
+const CafeStats = lazyPage(() => import('./pages/cafe/CafeStats.jsx'));
+const CafeSettings = lazyPage(() => import('./pages/cafe/CafeSettings.jsx'));
 
-import DriverAvailable from './pages/driver/DriverAvailable.jsx';
-import DriverActive from './pages/driver/DriverActive.jsx';
-import DriverEarnings from './pages/driver/DriverEarnings.jsx';
+const DriverAvailable = lazyPage(() => import('./pages/driver/DriverAvailable.jsx'));
+const DriverActive = lazyPage(() => import('./pages/driver/DriverActive.jsx'));
+const DriverEarnings = lazyPage(() => import('./pages/driver/DriverEarnings.jsx'));
 
-import AdminDashboard from './pages/admin/AdminDashboard.jsx';
-import AdminOrders from './pages/admin/AdminOrders.jsx';
-import AdminPeople from './pages/admin/AdminPeople.jsx';
-import AdminMoney from './pages/admin/AdminMoney.jsx';
-import AdminMore from './pages/admin/AdminMore.jsx';
-import AdminAreas from './pages/admin/AdminAreas.jsx';
-import AdminSettings from './pages/admin/AdminSettings.jsx';
-import AdminBroadcast from './pages/admin/AdminBroadcast.jsx';
+const AdminDashboard = lazyPage(() => import('./pages/admin/AdminDashboard.jsx'));
+const AdminOrders = lazyPage(() => import('./pages/admin/AdminOrders.jsx'));
+const AdminPeople = lazyPage(() => import('./pages/admin/AdminPeople.jsx'));
+const AdminMoney = lazyPage(() => import('./pages/admin/AdminMoney.jsx'));
+const AdminMore = lazyPage(() => import('./pages/admin/AdminMore.jsx'));
+const AdminAreas = lazyPage(() => import('./pages/admin/AdminAreas.jsx'));
+const AdminSettings = lazyPage(() => import('./pages/admin/AdminSettings.jsx'));
+const AdminBroadcast = lazyPage(() => import('./pages/admin/AdminBroadcast.jsx'));
 
 function RequireRole({ roles, children }) {
   const { user } = useAuth();
@@ -54,6 +96,11 @@ export default function App() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const redirected = useRef(false);
+
+  useEffect(() => {
+    if (!user?.role || !PREFETCH[user.role]) return;
+    Promise.all(PREFETCH[user.role]()).catch(() => {});
+  }, [user?.role]);
 
   // When a cafe owner / driver / admin opens the app, start on their dashboard
   useEffect(() => {

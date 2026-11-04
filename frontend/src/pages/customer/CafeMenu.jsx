@@ -9,6 +9,7 @@ import { useT } from '../../i18n/index.js';
 import { Async, Empty, FloatingCart, Sheet } from '../../components/ui.jsx';
 import Icon from '../../components/Icon.jsx';
 import LanguageSwitch from '../../components/LanguageSwitch.jsx';
+import { sized } from '../../lib/image.js';
 
 function ItemSheet({ item, cafe, onClose }) {
   const t = useT();
@@ -33,7 +34,7 @@ function ItemSheet({ item, cafe, onClose }) {
 
   return (
     <Sheet open title={item.name} onClose={onClose}>
-      {item.image && <img src={item.image} alt="" className="sheet__image" />}
+      {item.image && <img src={sized(item.image, 640)} alt="" className="sheet__image" decoding="async" />}
       {item.description && <p className="muted">{item.description}</p>}
       {item.options.length > 0 && (
         <div className="stack stack--sm">
@@ -97,7 +98,7 @@ export default function CafeMenu() {
         <div className="page stack">
           <div className="cafe-cover">
             {cafe.logo ? (
-              <img src={cafe.logo} alt="" className="cafe-cover__img" />
+              <img src={sized(cafe.logo, 640)} alt="" className="cafe-cover__img" decoding="async" />
             ) : (
               <div className="cafe-cover__pattern">🥘🍔🥤☕🫓🍟🥘🍔🥤☕🫓🍟🥘🍔🥤☕🫓🍟🥘🍔🥤☕🫓🍟</div>
             )}
@@ -110,7 +111,7 @@ export default function CafeMenu() {
           </div>
           <div className="cafe-info">
             <div className="cafe-hero">
-              {cafe.logo ? <img src={cafe.logo} alt="" className="cafe-hero__logo" /> : <div className="cafe-hero__logo">🍽</div>}
+              {cafe.logo ? <img src={sized(cafe.logo, 72, 72)} alt="" className="cafe-hero__logo" decoding="async" /> : <div className="cafe-hero__logo">🍽</div>}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div className="row row--between" style={{ alignItems: 'flex-start' }}>
                   <h2>{cafe.name}</h2>
@@ -190,7 +191,7 @@ export default function CafeMenu() {
                       </div>
                       {item.image ? (
                         <span className="menu-item__media">
-                          <img src={item.image} alt="" className="menu-item__img" />
+                          <img src={sized(item.image, 88, 88)} alt="" className="menu-item__img" loading="lazy" decoding="async" />
                           {inCart > 0 ? <span className="menu-item__count">{inCart}</span> : <span className="menu-item__add">+</span>}
                         </span>
                       ) : inCart > 0 ? (

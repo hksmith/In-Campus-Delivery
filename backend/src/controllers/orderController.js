@@ -22,14 +22,19 @@ export async function createOrder(req, res) {
   const user = req.user;
   const { cafeId, items, useSaved, place: placeInput, details, note, saveAsDefault } = req.body;
 
-  const settings = await Settings.getSettings();
-  if (!settings.isPlatformOpen) throw ApiError.badRequest(settings.closedMessage);
-
   assertObjectId(cafeId, 'cafe');
   if (!Array.isArray(items) || items.length === 0) throw ApiError.badRequest('Your cart is empty');
   if (items.length > 30) throw ApiError.badRequest('Too many items in one order');
+  const ids = items.map((i) => assertObjectId(i.menuItemId, 'menu item'));
 
-  const cafe = await Cafe.findById(cafeId);
+  // Independent lookups run at the same time instead of one after another
+  const [settings, cafe, activeCount, menuItems] = await Promise.all([
+    Settings.getSettings(),
+    Cafe.findById(cafeId),
+    Order.countDocuments({ customer: user._id, status: { $in: ACTIVE_STATUSES } }),
+    MenuItem.find({ _id: { $in: ids }, cafe: cafeId, isDeleted: false }),
+  ]);
+  if (!settings.isPlatformOpen) throw ApiError.badRequest(settings.closedMessage);
   if (!cafe || cafe.status !== 'approved') throw ApiError.notFound('Cafe not found');
   if (!cafe.isOpen) throw ApiError.badRequest(`${cafe.name} is not taking orders right now`);
 
@@ -47,14 +52,11 @@ export async function createOrder(req, res) {
   const cafeArea = await resolveArea(cafe.area);
   if (!cafeArea) throw ApiError.badRequest('Delivery areas are not set up yet – please tell the admin');
 
-  const activeCount = await Order.countDocuments({ customer: user._id, status: { $in: ACTIVE_STATUSES } });
   if (activeCount >= env.MAX_ACTIVE_ORDERS_PER_CUSTOMER) {
     throw ApiError.badRequest(`You can have at most ${env.MAX_ACTIVE_ORDERS_PER_CUSTOMER} active orders`);
   }
 
-  // Load menu items and price everything on the server (never trust client prices)
-  const ids = items.map((i) => assertObjectId(i.menuItemId, 'menu item'));
-  const menuItems = await MenuItem.find({ _id: { $in: ids }, cafe: cafe._id, isDeleted: false });
+  // Price everything on the server from the menu (never trust client prices)
   const byId = new Map(menuItems.map((m) => [String(m._id), m]));
 
   const lines = items.map((line) => {

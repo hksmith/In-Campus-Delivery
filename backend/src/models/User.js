@@ -15,6 +15,7 @@ const driverProfileSchema = new Schema(
     reviewedAt: Date,
     rejectionReason: { type: String, maxlength: 300 },
     isOnline: { type: Boolean, default: false },
+    lastNudgedAt: Date, // last "go online, deliveries are waiting" reminder
     rating: { type: Number, default: 0 },
     ratingCount: { type: Number, default: 0 },
     totalDeliveries: { type: Number, default: 0 },
@@ -87,5 +88,7 @@ userSchema.virtual('displayName').get(function displayName() {
 
 userSchema.index({ role: 1, 'driverProfile.status': 1, 'driverProfile.isOnline': 1 });
 userSchema.index({ username: 1 });
+userSchema.index({ 'driverProfile.status': 1 }); // pending driver applications (admin badge)
+userSchema.index({ cafe: 1, role: 1 }, { sparse: true }); // a cafe's owner + staff (new-order messages)
 
 export const User = mongoose.model('User', userSchema);

@@ -49,6 +49,7 @@ const walletTransactionSchema = new Schema(
 );
 
 walletTransactionSchema.index({ driver: 1, createdAt: -1 });
+walletTransactionSchema.index({ type: 1, status: 1, createdAt: 1 }); // pending top-ups (admin badge + list)
 walletTransactionSchema.index({ referenceKey: 1 }, { unique: true, sparse: true });
 // The platform cut is taken exactly once per order
 walletTransactionSchema.index(

@@ -9,6 +9,7 @@ const en = {
   btnViewOrder: 'View order',
   btnOpenOrders: 'Open orders',
   btnSeeDeliveries: 'See deliveries',
+  btnGoOnline: 'Go online',
   btnDeliveries: 'My deliveries',
   btnOrderAgain: 'Order again',
   btnRate: 'Rate order',
@@ -71,6 +72,14 @@ const en = {
   acceptedEta: ' Ready in about {mins} min.',
   newDelivery:
     '🛵 <b>New delivery available</b>\n{cafe} → {place}\nPay the cafe: {payout}\nYou earn: <b>{earn}</b>',
+  offlineNudgeOne:
+    '📦 <b>A delivery is waiting for a driver</b>\nYou are offline, so you are missing out on money. Go online to see it and take it.',
+  offlineNudge:
+    '📦 <b>{count} deliveries are waiting for a driver</b>\nYou are offline, so you are missing out on money. Go online to see them and take one.',
+  onlineList: '✅ <b>You are online.</b> Deliveries waiting now:\n\n{list}',
+  onlineListMore: '\n…and {n} more',
+  onlineListItem: '🛵 {cafe} → {place}\n     You earn <b>{earn}</b>',
+  onlineNone: '✅ <b>You are online.</b> No deliveries right now – we will message you as soon as one comes in.',
   rejected: "❌ <b>{cafe}</b> couldn't take your order {n}.{reason}",
   readyWithDriver: '🍽 Your order {n} is ready and your driver is picking it up.',
   readyNoDriver: '🍽 Your order {n} is ready. Waiting for a driver.',
@@ -117,6 +126,7 @@ const am = {
   btnViewOrder: 'ትዕዛዙን ይመልከቱ',
   btnOpenOrders: 'ትዕዛዞችን ክፈት',
   btnSeeDeliveries: 'ማድረሻዎችን ይመልከቱ',
+  btnGoOnline: 'መስመር ላይ ይግቡ',
   btnDeliveries: 'የእኔ ማድረሻዎች',
   btnOrderAgain: 'እንደገና ይዘዙ',
   btnRate: 'ትዕዛዙን ይገምግሙ',
@@ -175,6 +185,14 @@ const am = {
   accepted: '✅ <b>{cafe}</b> ትዕዛዝዎን {n} ተቀብሏል።',
   acceptedEta: ' በ{mins} ደቂቃ ገደማ ይዘጋጃል።',
   newDelivery: '🛵 <b>አዲስ ማድረሻ አለ</b>\n{cafe} → {place}\nለካፌው የሚከፍሉት: {payout}\nየሚያገኙት: <b>{earn}</b>',
+  offlineNudgeOne:
+    '📦 <b>አንድ ማድረሻ አድራሽ እየጠበቀ ነው</b>\nከመስመር ውጪ ስለሆኑ ገቢ እያመለጠዎት ነው። ለማየትና ለመውሰድ መስመር ላይ ይግቡ።',
+  offlineNudge:
+    '📦 <b>{count} ማድረሻዎች አድራሽ እየጠበቁ ነው</b>\nከመስመር ውጪ ስለሆኑ ገቢ እያመለጠዎት ነው። ለማየትና ለመውሰድ መስመር ላይ ይግቡ።',
+  onlineList: '✅ <b>መስመር ላይ ነዎት።</b> አሁን የሚጠብቁ ማድረሻዎች:\n\n{list}',
+  onlineListMore: '\n…እና ሌሎች {n}',
+  onlineListItem: '🛵 {cafe} → {place}\n     የሚያገኙት <b>{earn}</b>',
+  onlineNone: '✅ <b>መስመር ላይ ነዎት።</b> አሁን ማድረሻ የለም – አዲስ ሲመጣ ወዲያው እንልክልዎታለን።',
   rejected: '❌ <b>{cafe}</b> ትዕዛዝዎን {n} መቀበል አልቻለም።{reason}',
   readyWithDriver: '🍽 ትዕዛዝዎ {n} ተዘጋጅቷል፤ አድራሹ እየወሰደው ነው።',
   readyNoDriver: '🍽 ትዕዛዝዎ {n} ተዘጋጅቷል። አድራሽ እየተጠበቀ ነው።',

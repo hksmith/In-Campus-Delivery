@@ -109,7 +109,7 @@ export async function applyCafe(req, res) {
 
   const cafe = await Cafe.create({ ...data, owner: user._id, status: 'pending' });
 
-  emitTo(rooms.admins, 'admin:applications', {});
+  emitTo(rooms.admins, 'admin:applications', { kind: 'cafe', name: cafe.name });
   notifyAdmins(
     (lang) => tr(lang, 'newCafeAdmin', { name: escapeHtml(cafe.name), owner: escapeHtml(user.displayName) }),
     { button: { key: 'btnReview', path: '/admin/people?tab=cafes' } }

@@ -9,6 +9,7 @@ import { PhoneLink } from '../../components/ContactHost.jsx';
 import { toast } from '../../lib/toast.js';
 import { useT } from '../../i18n/index.js';
 import { Async, Empty, GenderTag, OrderItems, Sheet, StatusBadge, Tabs } from '../../components/ui.jsx';
+import { useNotifications } from '../../context/NotificationContext.jsx';
 
 function AssignSheet({ order, onClose, onDone }) {
   const t = useT();
@@ -167,6 +168,7 @@ export default function AdminOrders() {
   const scope = params.get('issues') === '1' ? 'issues' : params.get('scope') || 'active';
   const setScope = (s) => setParams(s === 'issues' ? { issues: '1' } : { scope: s }, { replace: true });
   const [search, setSearch] = useState('');
+  const { counts } = useNotifications();
   const query = scope === 'issues' ? { issues: '1', scope: 'all' } : { scope, ...(search ? { search } : {}) };
   const { data, loading, error, reload } = useApi('/admin/orders', { params: query });
   useSocketEvent('order:updated', () => reload());
@@ -180,7 +182,7 @@ export default function AdminOrders() {
         tabs={[
           { value: 'active', label: t('ao.active') },
           { value: 'all', label: t('ao.all') },
-          { value: 'issues', label: t('ao.issues') },
+          { value: 'issues', label: t('ao.issues'), count: counts.openIssues },
         ]}
       />
       {scope !== 'issues' && (

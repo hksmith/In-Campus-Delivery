@@ -10,6 +10,8 @@ import { toast } from '../../lib/toast.js';
 import { useT } from '../../i18n/index.js';
 import { Async, Empty, Rating, Sheet, Tabs } from '../../components/ui.jsx';
 import FeeRuleInput, { ruleText } from '../../components/FeeRule.jsx';
+import { useNotifications } from '../../context/NotificationContext.jsx';
+import { sized } from '../../lib/image.js';
 
 const STATUS_FILTERS = ['pending', 'approved', 'suspended', 'rejected'];
 
@@ -130,7 +132,7 @@ function Cafes() {
           data.cafes.map((c) => (
             <div key={c._id} className="card stack stack--sm">
               <div className="row">
-                {c.logo ? <img src={c.logo} alt="" className="avatar" /> : <div className="avatar">🏪</div>}
+                {c.logo ? <img src={sized(c.logo, 44, 44)} alt="" className="avatar" loading="lazy" decoding="async" /> : <div className="avatar">🏪</div>}
                 <div>
                   <strong>{c.name}</strong>
                   <div className="muted small">
@@ -249,7 +251,7 @@ function Drivers() {
                 <GenderButtons user={d} onDone={reload} />
                 {dp.idImage && (
                   <a href={dp.idImage} target="_blank" rel="noreferrer">
-                    <img src={dp.idImage} alt="Student ID" className="id-photo" />
+                    <img src={sized(dp.idImage, 600)} alt="Student ID" className="id-photo" loading="lazy" decoding="async" />
                   </a>
                 )}
                 {dp.rejectionReason && <div className="small">{t('common.reason', { reason: dp.rejectionReason })}</div>}
@@ -365,6 +367,7 @@ export default function AdminPeople() {
   const t = useT();
   const [params, setParams] = useSearchParams();
   const tab = params.get('tab') || 'cafes';
+  const { counts } = useNotifications();
   return (
     <div className="page stack">
       <h2>{t('ap.title')}</h2>
@@ -372,8 +375,8 @@ export default function AdminPeople() {
         value={tab}
         onChange={(v) => setParams({ tab: v }, { replace: true })}
         tabs={[
-          { value: 'cafes', label: t('ap.cafes') },
-          { value: 'drivers', label: t('ap.drivers') },
+          { value: 'cafes', label: t('ap.cafes'), count: counts.pendingCafes },
+          { value: 'drivers', label: t('ap.drivers'), count: counts.pendingDrivers },
           { value: 'users', label: t('ap.users') },
         ]}
       />

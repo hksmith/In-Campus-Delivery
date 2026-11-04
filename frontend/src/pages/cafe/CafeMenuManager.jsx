@@ -6,6 +6,7 @@ import { money } from '../../lib/format.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useT } from '../../i18n/index.js';
 import { Async, Empty, Toggle } from '../../components/ui.jsx';
+import { sized } from '../../lib/image.js';
 
 export default function CafeMenuManager() {
   const t = useT();
@@ -60,7 +61,7 @@ export default function CafeMenuManager() {
               <h3 className="section-title">{category}</h3>
               {items.map((item) => (
                 <div key={item._id} className={`menu-admin ${item.isAvailable ? '' : 'menu-admin--off'}`}>
-                  {item.image ? <img src={item.image} alt="" className="menu-admin__img" /> : <div className="menu-admin__img">🍽</div>}
+                  {item.image ? <img src={sized(item.image, 52, 52)} alt="" className="menu-admin__img" loading="lazy" decoding="async" /> : <div className="menu-admin__img">🍽</div>}
                   <div className="menu-admin__body">
                     {isOwner ? (
                       <Link to={`/cafe/menu/${item._id}`}>

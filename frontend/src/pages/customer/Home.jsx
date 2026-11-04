@@ -11,12 +11,13 @@ import Icon from '../../components/Icon.jsx';
 import { TopBar } from '../../components/Layout.jsx';
 import { TRACK_STEPS } from '../../lib/constants.js';
 import { useSocketEvent } from '../../lib/socket.js';
+import { sized } from '../../lib/image.js';
 
 export function CafeCard({ cafe }) {
   const t = useT();
   return (
     <Link to={`/cafes/${cafe._id}`} className={`cafe-card ${cafe.isOpen ? '' : 'cafe-card--closed'}`}>
-      {cafe.logo ? <img src={cafe.logo} alt="" className="cafe-card__logo" /> : <div className="cafe-card__logo">🍽</div>}
+      {cafe.logo ? <img src={sized(cafe.logo, 72, 72)} alt="" className="cafe-card__logo" loading="lazy" decoding="async" /> : <div className="cafe-card__logo">🍽</div>}
       <div className="cafe-card__body">
         <div className="row row--between">
           <strong>{cafe.name}</strong>

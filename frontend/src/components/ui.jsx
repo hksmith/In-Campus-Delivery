@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useT } from '../i18n/index.js';
 import { Link } from 'react-router-dom';
 import Icon from './Icon.jsx';
+import { sized } from '../lib/image.js';
 
 export function Loader({ label, full = false }) {
   const t = useT();
@@ -243,7 +244,7 @@ export function ImageUpload({ value, onChange, label }) {
     <div className="field">
       <span className="field__label">{label}</span>
       <div className="upload">
-        {value ? <img src={value} alt="" className="upload__preview" /> : <div className="upload__placeholder">📷</div>}
+        {value ? <img src={sized(value, 76, 76)} alt="" className="upload__preview" decoding="async" /> : <div className="upload__placeholder">📷</div>}
         <div className="upload__actions">
           <label className="btn btn--secondary btn--sm">
             {busy ? t('common.uploading') : value ? t('common.change') : t('common.upload')}

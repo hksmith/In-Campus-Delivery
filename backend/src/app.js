@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env.js';
 import { sanitize } from './middleware/sanitize.js';
@@ -27,6 +28,8 @@ export function createApp() {
 
   app.use(helmet({ crossOriginResourcePolicy: false }));
   app.use(cors({ origin: corsOrigin }));
+  // gzip JSON replies (menus, order lists) – 70–80% smaller on slow phone connections
+  app.use(compression({ threshold: 1024 }));
   app.use(express.json({ limit: '1mb' }));
   app.use(sanitize);
   // Don't fill the log with keep-alive / uptime pings

@@ -52,6 +52,8 @@ export const env = {
 
   ORDER_ACCEPT_TIMEOUT_MINUTES: num(process.env.ORDER_ACCEPT_TIMEOUT_MINUTES, 5),
   UNCLAIMED_ALERT_MINUTES: num(process.env.UNCLAIMED_ALERT_MINUTES, 15),
+  /** Offline drivers get at most one "you're missing deliveries" reminder per this many minutes */
+  OFFLINE_NUDGE_MINUTES: num(process.env.OFFLINE_NUDGE_MINUTES, 30),
   MAX_ACTIVE_ORDERS_PER_CUSTOMER: num(process.env.MAX_ACTIVE_ORDERS_PER_CUSTOMER, 3),
   MAX_ACTIVE_DELIVERIES_PER_DRIVER: num(process.env.MAX_ACTIVE_DELIVERIES_PER_DRIVER, 3),
   DELIVERY_CODE_MAX_ATTEMPTS: num(process.env.DELIVERY_CODE_MAX_ATTEMPTS, 5),

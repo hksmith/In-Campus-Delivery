@@ -39,8 +39,19 @@ export async function stats(req, res) {
   const tz = env.TIMEZONE;
   const todayStart = startOfDay(tz, 0);
 
-  const [today, week, month, activeOrders, todayByStatus, usersByRole, onlineDrivers, pendingCafes, pendingDrivers] =
-    await Promise.all([
+  const [
+    today,
+    week,
+    month,
+    activeOrders,
+    todayByStatus,
+    usersByRole,
+    onlineDrivers,
+    pendingCafes,
+    pendingDrivers,
+    pendingTopUps,
+    openIssues,
+  ] = await Promise.all([
       revenueSince(todayStart),
       revenueSince(startOfDay(tz, 6)),
       revenueSince(startOfDay(tz, 29)),
@@ -50,11 +61,9 @@ export async function stats(req, res) {
       User.countDocuments({ role: 'driver', 'driverProfile.status': 'approved', 'driverProfile.isOnline': true }),
       Cafe.countDocuments({ status: 'pending' }),
       User.countDocuments({ 'driverProfile.status': 'pending' }),
+      WalletTransaction.countDocuments({ type: 'topup', status: 'pending' }),
+      Order.countDocuments({ 'pickupIssue.reported': true, 'pickupIssue.resolved': false }),
     ]);
-  const [pendingTopUps, openIssues] = await Promise.all([
-    WalletTransaction.countDocuments({ type: 'topup', status: 'pending' }),
-    Order.countDocuments({ 'pickupIssue.reported': true, 'pickupIssue.resolved': false }),
-  ]);
 
   const topCafes = await Order.aggregate([
     { $match: { status: 'delivered', deliveredAt: { $gte: startOfDay(tz, 29) } } },

@@ -5,7 +5,9 @@ import { env } from '../config/env.js';
 import { ApiError } from '../utils/ApiError.js';
 import { assertObjectId, parsePaging, round2 } from '../utils/helpers.js';
 import { startOfDay } from '../utils/time.js';
-import { applyStatus, populateOrder, publishOrderEvent, viewFor } from '../services/orderService.js';
+import { applyStatus, placeText, poolFilterFor, populateOrder, publishOrderEvent, viewFor } from '../services/orderService.js';
+import { escapeHtml, money, sendTo } from '../services/telegram.js';
+import { tr } from '../i18n/messages.js';
 import { translateError } from '../i18n/errors.js';
 import { assertCanTake, chargeOrderFee, requestTopUp, walletSummary } from '../services/walletService.js';
 
@@ -19,19 +21,51 @@ const genderFilter = (driver) => ({
 /** PATCH /api/driver/status { isOnline } */
 export async function setOnline(req, res) {
   const user = req.user;
+  const wasOnline = user.driverProfile.isOnline;
   user.driverProfile.isOnline = Boolean(req.body.isOnline);
   await user.save();
   res.json({ user: user.toJSON() });
+  // Just went online → send the deliveries that are waiting right now (in the background)
+  if (!wasOnline && user.driverProfile.isOnline) sendWaitingDeliveries(user).catch(() => {});
+}
+
+const ONLINE_LIST_MAX = 5;
+
+/** Telegram message listing the deliveries a driver can take right now */
+async function sendWaitingDeliveries(user) {
+  const filter = poolFilterFor(user);
+  const [orders, total] = await Promise.all([
+    Order.find(filter).sort({ acceptedAt: 1 }).limit(ONLINE_LIST_MAX).populate('cafe', 'name').lean(),
+    Order.countDocuments(filter),
+  ]);
+  const button = { key: 'btnSeeDeliveries', path: '/driver' };
+  if (!orders.length) return sendTo(user, (lang) => tr(lang, 'onlineNone'), { button });
+  return sendTo(
+    user,
+    (lang) => {
+      const list = orders
+        .map((o) =>
+          tr(lang, 'onlineListItem', { cafe: escapeHtml(o.cafe?.name), place: placeText(o), earn: money(o.driverEarning) })
+        )
+        .join('\n\n');
+      const more = total > orders.length ? tr(lang, 'onlineListMore', { n: total - orders.length }) : '';
+      return tr(lang, 'onlineList', { list: list + more });
+    },
+    { button }
+  );
 }
 
 /** GET /api/driver/available – orders nobody has claimed yet */
 export async function available(req, res) {
-  const orders = await populateOrder(
-    Order.find({ status: { $in: POOL_STATUSES }, driver: null, ...genderFilter(req.user) })
-      .sort({ acceptedAt: 1 })
-      .limit(50)
-  );
-  res.json({ orders: orders.map((o) => viewFor(o, 'driver-pool')), wallet: await walletSummary(req.user) });
+  const [orders, wallet] = await Promise.all([
+    populateOrder(
+      Order.find({ status: { $in: POOL_STATUSES }, driver: null, ...genderFilter(req.user) })
+        .sort({ acceptedAt: 1 })
+        .limit(50)
+    ),
+    walletSummary(req.user),
+  ]);
+  res.json({ orders: orders.map((o) => viewFor(o, 'driver-pool')), wallet });
 }
 
 /** GET /api/driver/active – my current deliveries */

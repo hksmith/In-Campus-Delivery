@@ -10,6 +10,7 @@ import { Async, Empty, OrderItems, StatusBadge, Tabs } from '../../components/ui
 import { Route } from './DriverAvailable.jsx';
 import DriverRatings from './DriverRatings.jsx';
 import { useSearchParams } from 'react-router-dom';
+import { useNotifications } from '../../context/NotificationContext.jsx';
 
 function DeliveryCard({ order, onChanged }) {
   const t = useT();
@@ -241,6 +242,7 @@ export default function DriverActive() {
   const [params, setParams] = useSearchParams();
   const tab = TABS.includes(params.get('tab')) ? params.get('tab') : 'active';
   const setTab = (value) => setParams(value === 'active' ? {} : { tab: value }, { replace: true });
+  const { counts } = useNotifications();
 
   return (
     <div className="page stack">
@@ -249,7 +251,7 @@ export default function DriverActive() {
         value={tab}
         onChange={setTab}
         tabs={[
-          { value: 'active', label: t('dh.active') },
+          { value: 'active', label: t('dh.active'), count: counts.myTrips },
           { value: 'history', label: t('dh.history') },
           { value: 'ratings', label: t('nav.ratings') },
         ]}

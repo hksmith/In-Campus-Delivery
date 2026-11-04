@@ -1,5 +1,6 @@
 import { Order, User } from '../models/index.js';
 import { env } from '../config/env.js';
+import { POOL_STATUSES } from '../config/constants.js';
 import { emitTo, rooms } from './realtime.js';
 import { sendTo, sendMany, escapeHtml, money, notifyAdmins } from './telegram.js';
 import { tr, reasonLine } from '../i18n/messages.js';
@@ -71,28 +72,68 @@ async function cafeTeam(cafeId) {
     .lean();
 }
 
-/** Online, approved drivers who are allowed to deliver this order */
-async function onlineDrivers(order) {
+/** Approved drivers who are allowed to deliver this order, online or offline */
+function driversFor(order, isOnline) {
   return User.find({
     role: 'driver',
     'driverProfile.status': 'approved',
-    'driverProfile.isOnline': true,
+    'driverProfile.isOnline': isOnline,
     isBanned: false,
     ...(['female', 'male'].includes(order.delivery?.driverGender) ? { gender: order.delivery.driverGender } : {}),
-  })
-    .select(RECIPIENT_FIELDS)
+  });
+}
+
+/** Online, approved drivers who are allowed to deliver this order */
+async function onlineDrivers(order) {
+  return driversFor(order, true).select(RECIPIENT_FIELDS).lean();
+}
+
+/** Where an order goes, as one line of text (already HTML-escaped) */
+export function placeText(order) {
+  return escapeHtml(
+    [order.delivery?.locationName, order.delivery?.details, order.delivery?.location ? null : order.delivery?.areaName]
+      .filter(Boolean)
+      .join(', ')
+  );
+}
+
+/** Mongo filter: orders waiting for a driver that this driver may take (respects single-gender drop-offs) */
+export function poolFilterFor(driver) {
+  return {
+    status: { $in: POOL_STATUSES },
+    driver: null,
+    'delivery.driverGender': {
+      $in: ['any', null, ...(['female', 'male'].includes(driver.gender) ? [driver.gender] : [])],
+    },
+  };
+}
+
+/**
+ * Offline drivers don't get every delivery – just a reminder that they are missing out,
+ * at most once every OFFLINE_NUDGE_MINUTES so they are not spammed.
+ */
+async function nudgeOfflineDrivers(order) {
+  const since = new Date(Date.now() - env.OFFLINE_NUDGE_MINUTES * 60000);
+  const drivers = await driversFor(order, false)
+    .or([{ 'driverProfile.lastNudgedAt': null }, { 'driverProfile.lastNudgedAt': { $lt: since } }])
+    .select(`${RECIPIENT_FIELDS} gender`)
     .lean();
+  for (const d of drivers) {
+    if (!d.telegramId || d.botBlocked) continue;
+    const count = await Order.countDocuments(poolFilterFor(d));
+    if (!count) continue;
+    await User.updateOne({ _id: d._id }, { 'driverProfile.lastNudgedAt': new Date() });
+    await sendTo(d, (lang) => tr(lang, count === 1 ? 'offlineNudgeOne' : 'offlineNudge', { count }), {
+      button: { key: 'btnGoOnline', path: '/driver' },
+    });
+  }
 }
 
 async function sendTelegramForEvent(order, event, { note, previousDriverId } = {}) {
   const v = {
     n: `#${order.orderNumber}`,
     cafe: escapeHtml(order.cafe?.name),
-    place: escapeHtml(
-      [order.delivery?.locationName, order.delivery?.details, order.delivery?.location ? null : order.delivery?.areaName]
-        .filter(Boolean)
-        .join(', ')
-    ),
+    place: placeText(order),
     driver: escapeHtml(order.driver?.fullName || order.driver?.firstName || ''),
     payout: money(order.cafePayout),
   };
@@ -127,6 +168,7 @@ async function sendTelegramForEvent(order, event, { note, previousDriverId } = {
         await sendMany(await onlineDrivers(order), (lang) => tr(lang, 'newDelivery', { ...v, earn: money(order.driverEarning) }), {
           button: { key: 'btnSeeDeliveries', path: '/driver' },
         });
+        await nudgeOfflineDrivers(order);
       }
       break;
     }
@@ -222,13 +264,37 @@ export async function publishOrderEvent(orderId, event, extra = {}) {
       event,
     };
     emitTo(rooms.user(order.customer._id), 'order:updated', payload);
+    // Only the student who placed it: used for the "your order is on the way" banner
+    emitTo(rooms.user(order.customer._id), 'myorder:updated', {
+      ...payload,
+      cafeName: order.cafe?.name,
+      cancelledBy: order.cancelledBy,
+    });
     emitTo(rooms.cafe(order.cafe._id), 'order:updated', payload);
     if (order.driver) emitTo(rooms.user(order.driver._id), 'order:updated', payload);
     if (extra.previousDriverId) emitTo(rooms.user(extra.previousDriverId), 'order:updated', payload);
     emitTo(rooms.admins, 'order:updated', payload);
     emitTo(rooms.drivers, 'pool:changed', payload);
-    if (event === 'created') emitTo(rooms.cafe(order.cafe._id), 'order:new', payload);
-    if (event === 'accepted' && !order.driver) emitTo(rooms.drivers, 'pool:new', payload);
+    // Extra details for the in-app "new order / new delivery" banners
+    const banner = {
+      ...payload,
+      cafeName: order.cafe?.name,
+      place: [order.delivery?.locationName, order.delivery?.details].filter(Boolean).join(', ') || order.delivery?.areaName,
+    };
+    if (event === 'created') {
+      emitTo(rooms.cafe(order.cafe._id), 'order:new', {
+        ...banner,
+        itemCount: order.items?.reduce((n, i) => n + (i.quantity || 1), 0),
+        subtotal: order.subtotal,
+      });
+    }
+    if (event === 'accepted' && !order.driver) {
+      emitTo(rooms.drivers, 'pool:new', {
+        ...banner,
+        earn: order.driverEarning,
+        driverGender: order.delivery?.driverGender || 'any',
+      });
+    }
 
     await sendTelegramForEvent(order, event, extra);
   } catch (err) {

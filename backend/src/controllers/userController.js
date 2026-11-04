@@ -83,7 +83,7 @@ export async function applyAsDriver(req, res) {
   if (!user.studentId) user.studentId = idNumber;
   await user.save();
 
-  emitTo(rooms.admins, 'admin:applications', {});
+  emitTo(rooms.admins, 'admin:applications', { kind: 'driver', name: user.displayName });
   notifyAdmins((lang) => tr(lang, 'newDriverAdmin', { name: escapeHtml(user.displayName) }), {
     button: { key: 'btnReview', path: '/admin/people?tab=drivers' },
   });

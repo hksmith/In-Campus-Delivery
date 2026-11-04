@@ -5,6 +5,41 @@ import { STATUS } from '../../lib/constants.js';
 import { useSocketEvent } from '../../lib/socket.js';
 import { useT } from '../../i18n/index.js';
 import { Async, StatGrid } from '../../components/ui.jsx';
+import Icon from '../../components/Icon.jsx';
+
+/** "Needs your review": one row per kind of thing waiting for the admin, each opening the right page */
+function ReviewList({ data }) {
+  const t = useT();
+  const rows = [
+    { n: data.pendingDrivers, icon: 'bike', label: t('rv.drivers'), where: t('rv.driversWhere'), to: '/admin/people?tab=drivers' },
+    { n: data.pendingCafes, icon: 'menu', label: t('rv.cafes'), where: t('rv.cafesWhere'), to: '/admin/people?tab=cafes' },
+    { n: data.pendingTopUps, icon: 'wallet', label: t('rv.topups'), where: t('rv.topupsWhere'), to: '/admin/money' },
+    { n: data.openIssues, icon: 'alert', label: t('rv.issues'), where: t('rv.issuesWhere'), to: '/admin/orders?issues=1', bad: true },
+  ].filter((r) => r.n > 0);
+  if (!rows.length) return null;
+  const total = rows.reduce((s, r) => s + r.n, 0);
+
+  return (
+    <section className="review-list">
+      <div className="review-list__head">
+        <h3>{t('rv.title')}</h3>
+        <span className="count-pill">{total}</span>
+      </div>
+      {rows.map((r) => (
+        <Link key={r.to} to={r.to} className="review-list__row">
+          <span className={`review-list__icon ${r.bad ? 'review-list__icon--bad' : ''}`}>
+            <Icon name={r.icon} size={19} />
+          </span>
+          <span className="review-list__text">
+            <strong>{r.label}</strong>
+            <span className="muted small">{r.where}</span>
+          </span>
+          <span className={`count-pill ${r.bad ? 'count-pill--bad' : ''}`}>{r.n}</span>
+        </Link>
+      ))}
+    </section>
+  );
+}
 
 export default function AdminDashboard() {
   const t = useT();
@@ -19,21 +54,7 @@ export default function AdminDashboard() {
       <Async loading={loading} error={error} reload={reload}>
         {data && (
           <>
-            {data.pendingTopUps > 0 && (
-              <Link to="/admin/money" className="banner banner--warn">
-                {t('ad.topups', { n: data.pendingTopUps })}
-              </Link>
-            )}
-            {data.openIssues > 0 && (
-              <Link to="/admin/orders?issues=1" className="banner banner--bad">
-                {t('ad.issues', { n: data.openIssues })}
-              </Link>
-            )}
-            {(data.pendingCafes > 0 || data.pendingDrivers > 0) && (
-              <Link to="/admin/people" className="banner banner--warn">
-                {t('ad.waiting', { cafes: data.pendingCafes, drivers: data.pendingDrivers })}
-              </Link>
-            )}
+            <ReviewList data={data} />
             <StatGrid
               items={[
                 { label: t('ad.active'), value: data.activeOrders },

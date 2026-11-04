@@ -13,6 +13,7 @@ import * as orders from '../controllers/orderController.js';
 import * as myCafe from '../controllers/myCafeController.js';
 import * as driver from '../controllers/driverController.js';
 import * as admin from '../controllers/adminController.js';
+import * as notifications from '../controllers/notificationController.js';
 
 const router = Router();
 router.use(authenticate);
@@ -23,6 +24,9 @@ router.patch('/users/me', ah(users.updateMe));
 router.post('/users/me/start', ah(users.chooseStart));
 router.post('/users/me/driver-application', ah(users.applyAsDriver));
 router.get('/users/me/cafe-application', ah(users.myCafeApplication));
+
+// ── Badge numbers for tabs ──
+router.get('/notifications/counts', ah(notifications.counts));
 
 // ── Image upload (menu photos, logos, ID cards) ──
 const upload = multer({

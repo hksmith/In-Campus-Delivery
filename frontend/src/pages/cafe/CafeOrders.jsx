@@ -9,24 +9,6 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { useT } from '../../i18n/index.js';
 import { Async, Empty, OrderItems, StatusBadge, Tabs, Toggle } from '../../components/ui.jsx';
 
-/** Short "ding" so the counter notices new orders */
-function beep() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.connect(g);
-    g.connect(ctx.destination);
-    o.frequency.value = 880;
-    g.gain.setValueAtTime(0.25, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-    o.start();
-    o.stop(ctx.currentTime + 0.6);
-  } catch {
-    /* audio not allowed */
-  }
-}
-
 function AcceptingSwitch() {
   const t = useT();
   const { cafe, refresh } = useAuth();
@@ -197,11 +179,8 @@ export default function CafeOrders() {
   const active = useApi('/my-cafe/orders', { params: { scope: 'active' } });
   const history = useApi(tab === 'history' ? '/my-cafe/orders' : null, { params: { scope: 'history' } });
 
-  useSocketEvent('order:new', () => {
-    beep();
-    haptic.warning();
-    toast.info(t('co.newToast'));
-  });
+  // The sound + banner for a new order come from NotificationContext
+  useSocketEvent('order:new', () => active.reload());
   useSocketEvent('order:updated', () => {
     active.reload();
     if (tab === 'history') history.reload();

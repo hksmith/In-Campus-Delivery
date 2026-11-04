@@ -8,6 +8,8 @@ import { toast } from '../../lib/toast.js';
 import { useT } from '../../i18n/index.js';
 import { Async, Empty, Sheet, StatGrid, Tabs } from '../../components/ui.jsx';
 import { TxRow } from '../driver/DriverEarnings.jsx';
+import { useNotifications } from '../../context/NotificationContext.jsx';
+import { sized } from '../../lib/image.js';
 
 const V_TONE = { verified: 'ok', failed: 'bad', review: 'warn', unavailable: 'warn', manual: 'info' };
 
@@ -89,7 +91,7 @@ function TopUps({ status }) {
               {tx.rejectionReason && <div className="small">{t('common.reason', { reason: tx.rejectionReason })}</div>}
               {tx.proofImage && (
                 <a href={tx.proofImage} target="_blank" rel="noreferrer">
-                  <img src={tx.proofImage} alt={t('aw.receipt')} className="id-photo" />
+                  <img src={sized(tx.proofImage, 600)} alt={t('aw.receipt')} className="id-photo" loading="lazy" decoding="async" />
                 </a>
               )}
               {status === 'pending' && (
@@ -210,6 +212,7 @@ function Balances() {
 export default function AdminMoney() {
   const t = useT();
   const [tab, setTab] = useState('pending');
+  const { counts } = useNotifications();
   return (
     <div className="page stack">
       <h2>{t('aw.title')}</h2>
@@ -218,7 +221,7 @@ export default function AdminMoney() {
         value={tab}
         onChange={setTab}
         tabs={[
-          { value: 'pending', label: t('aw.tabTopups') },
+          { value: 'pending', label: t('aw.tabTopups'), count: counts.pendingTopUps },
           { value: 'balances', label: t('aw.tabWallets') },
           { value: 'approved', label: t('aw.tabHistory') },
         ]}

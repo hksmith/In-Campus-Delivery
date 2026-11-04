@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
@@ -5,36 +6,43 @@ import { ROLE_HOME } from '../lib/constants.js';
 import { useT } from '../i18n/index.js';
 import LanguageSwitch from './LanguageSwitch.jsx';
 import Icon from './Icon.jsx';
+import { Loader } from './ui.jsx';
+import NotificationBanners from './NotificationBanners.jsx';
+import { useNotifications } from '../context/NotificationContext.jsx';
+
+/** Adds up the counts named in a nav item's `badge` list */
+export const sumCounts = (counts, keys = []) => keys.reduce((n, k) => n + (counts[k] || 0), 0);
+const badgeText = (n) => (n > 99 ? '99+' : n);
 
 const NAVS = {
   customer: [
     { to: '/', label: 'nav.home', icon: 'home', end: true },
-    { to: '/orders', label: 'nav.orders', icon: 'receipt' },
+    { to: '/orders', label: 'nav.orders', icon: 'receipt', badge: ['myOrders'] },
     { to: '/cart', label: 'nav.cart', icon: 'bag', cart: true },
     { to: '/profile', label: 'nav.profile', icon: 'user' },
   ],
   cafe_owner: [
-    { to: '/cafe/orders', label: 'nav.orders', icon: 'receipt' },
+    { to: '/cafe/orders', label: 'nav.orders', icon: 'receipt', badge: ['cafeNew', 'cafeKitchen'] },
     { to: '/cafe/menu', label: 'nav.menu', icon: 'menu' },
     { to: '/cafe/stats', label: 'nav.stats', icon: 'chart' },
     { to: '/cafe/settings', label: 'nav.settings', icon: 'settings' },
   ],
   cafe_staff: [
-    { to: '/cafe/orders', label: 'nav.orders', icon: 'receipt' },
+    { to: '/cafe/orders', label: 'nav.orders', icon: 'receipt', badge: ['cafeNew', 'cafeKitchen'] },
     { to: '/cafe/menu', label: 'nav.menu', icon: 'menu' },
     { to: '/profile', label: 'nav.profile', icon: 'user' },
   ],
   driver: [
-    { to: '/driver', label: 'nav.available', icon: 'box', end: true },
-    { to: '/driver/active', label: 'nav.trips', icon: 'bike' },
+    { to: '/driver', label: 'nav.available', icon: 'box', end: true, badge: ['available'] },
+    { to: '/driver/active', label: 'nav.trips', icon: 'bike', badge: ['myTrips'] },
     { to: '/driver/earnings', label: 'nav.wallet', icon: 'wallet' },
     { to: '/profile', label: 'nav.profile', icon: 'user' },
   ],
   admin: [
     { to: '/admin', label: 'nav.home', icon: 'grid', end: true },
-    { to: '/admin/orders', label: 'nav.orders', icon: 'receipt' },
-    { to: '/admin/people', label: 'nav.people', icon: 'users' },
-    { to: '/admin/money', label: 'nav.wallets', icon: 'wallet' },
+    { to: '/admin/orders', label: 'nav.orders', icon: 'receipt', badge: ['openIssues'], urgent: true },
+    { to: '/admin/people', label: 'nav.people', icon: 'users', badge: ['pendingCafes', 'pendingDrivers'] },
+    { to: '/admin/money', label: 'nav.wallets', icon: 'wallet', badge: ['pendingTopUps'] },
     { to: '/admin/more', label: 'nav.more', icon: 'settings' },
   ],
 };
@@ -56,6 +64,8 @@ export function TopBar({ hero = false }) {
   const navigate = useNavigate();
   const inShop = areaFor(pathname, user.role) === 'customer';
   const isWorker = user.role !== 'customer';
+  const { counts } = useNotifications();
+  const waiting = (NAVS[user.role] || []).reduce((n, item) => n + sumCounts(counts, item.badge), 0);
 
   return (
     <header className={`topbar ${hero ? 'topbar--hero' : ''}`}>
@@ -68,8 +78,9 @@ export function TopBar({ hero = false }) {
       </div>
       <div className="row">
         {isWorker && (
-          <button className="chip" onClick={() => navigate(inShop ? ROLE_HOME[user.role] : '/')}>
+          <button className="chip chip--dot-host" onClick={() => navigate(inShop ? ROLE_HOME[user.role] : '/')}>
             {inShop ? t('nav.dashboard') : t('nav.orderFood')}
+            {inShop && waiting > 0 && <span className="chip__dot" aria-label={t('nt.waiting', { n: waiting })} />}
           </button>
         )}
         <LanguageSwitch compact />
@@ -85,6 +96,7 @@ export default function Layout() {
   const t = useT();
   const { user, settings } = useAuth();
   const { count } = useCart();
+  const { counts } = useNotifications();
   const { pathname } = useLocation();
 
   const area = areaFor(pathname, user.role);
@@ -94,25 +106,34 @@ export default function Layout() {
   return (
     <div className={`app ${ownHeader ? 'app--hero' : ''}`}>
       {!ownHeader && <TopBar />}
+      <NotificationBanners />
 
       {inShop && settings && !settings.isPlatformOpen && (
         <div className="banner banner--bad">{settings.closedMessage}</div>
       )}
 
       <main className="content">
-        <Outlet />
+        {/* Dashboard screens are downloaded on first visit – show a spinner meanwhile */}
+        <Suspense fallback={<Loader />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <nav className="bottomnav">
-        {NAVS[area].map((item) => (
-          <NavLink key={item.to} to={item.to} end={item.end} className="bottomnav__item">
-            <span className="bottomnav__icon">
-              <Icon name={item.icon} size={21} />
-              {item.cart && count > 0 && <span className="bottomnav__badge">{count}</span>}
-            </span>
-            <span>{t(item.label)}</span>
-          </NavLink>
-        ))}
+        {NAVS[area].map((item) => {
+          const n = item.cart ? count : sumCounts(counts, item.badge);
+          return (
+            <NavLink key={item.to} to={item.to} end={item.end} className="bottomnav__item">
+              <span className="bottomnav__icon">
+                <Icon name={item.icon} size={21} />
+                {n > 0 && (
+                  <span className={`bottomnav__badge ${item.urgent ? 'bottomnav__badge--bad' : ''}`}>{badgeText(n)}</span>
+                )}
+              </span>
+              <span>{t(item.label)}</span>
+            </NavLink>
+          );
+        })}
       </nav>
     </div>
   );

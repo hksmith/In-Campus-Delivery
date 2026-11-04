@@ -3,25 +3,57 @@ import { api, errorMessage } from './api.js';
 import { toast } from './toast.js';
 
 /**
+ * Last answer for each request, so a page you already visited shows at once
+ * and refreshes quietly in the background (no spinner). Kept in memory only.
+ */
+const responseCache = new Map();
+const CACHE_LIMIT = 60;
+
+function remember(key, data) {
+  responseCache.delete(key);
+  responseCache.set(key, data);
+  if (responseCache.size > CACHE_LIMIT) responseCache.delete(responseCache.keys().next().value);
+}
+
+/** Forget everything (called when the user or their role changes) */
+export function clearApiCache() {
+  responseCache.clear();
+}
+
+/**
  * Loads data from the API.
  *   const { data, loading, error, reload } = useApi('/orders', { params })
  * Pass `null` as url to skip loading.
+ * If this request was loaded before, its last result shows immediately while fresh data loads.
  */
 export function useApi(url, options = {}) {
-  const [state, setState] = useState({ data: null, loading: Boolean(url), error: null });
   const key = url ? `${url}?${JSON.stringify(options.params || {})}` : null;
+  const [state, setState] = useState(() => {
+    const cached = key ? responseCache.get(key) : undefined;
+    return cached !== undefined ? { data: cached, loading: false, error: null } : { data: null, loading: Boolean(url), error: null };
+  });
   const optsRef = useRef(options);
   optsRef.current = options;
 
   const load = useCallback(
     async (silent = false) => {
       if (!key) return;
-      if (!silent) setState((s) => ({ ...s, loading: true, error: null }));
+      if (!silent) {
+        const cached = responseCache.get(key);
+        if (cached !== undefined) {
+          setState({ data: cached, loading: false, error: null });
+          silent = true;
+        } else {
+          setState((s) => ({ ...s, loading: true, error: null }));
+        }
+      }
       try {
         const { data } = await api.get(url, { params: optsRef.current.params });
+        remember(key, data);
         setState({ data, loading: false, error: null });
       } catch (err) {
-        setState((s) => ({ ...s, loading: false, error: errorMessage(err) }));
+        // Keep showing what we have if a background refresh fails
+        setState((s) => ({ ...s, loading: false, error: s.data ? null : errorMessage(err) }));
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -34,7 +66,14 @@ export function useApi(url, options = {}) {
 
   /** reload(true) refreshes without showing the loading spinner */
   const reload = useCallback((silent = true) => load(silent), [load]);
-  return { ...state, reload, setData: (data) => setState((s) => ({ ...s, data })) };
+  const setData = useCallback(
+    (data) => {
+      if (key) remember(key, data);
+      setState((s) => ({ ...s, data }));
+    },
+    [key]
+  );
+  return { ...state, reload, setData };
 }
 
 /** Wraps an async action with a busy flag and error toast */
